@@ -5,5 +5,14 @@ Design and implement the basic machine architecture
  - Execute **Load** and **Store** instructions
  - Build initial user interface to simulator
  
-## 2. Deadline
-Sunday, Feb. 6
+## 2. Submission
+ - An executable file
+ - User instruction
+ - Source code (with header comments for each module and comments of code)
+ - Design notes
+
+## 3. Language & Module
+- Python 3.7.8
+- tkinter
+
+## 4. Description
