@@ -35,6 +35,10 @@ class PC(Register):
 class MAR(Register):
     """This is the class of Memory Address Register
     MAR has 12 bits
+
+    Function:
+    ------------
+    get_from_PC
     """
     def __init__(self, size=12, label='MAR'):
         super().__init__(size=size, label=label)
