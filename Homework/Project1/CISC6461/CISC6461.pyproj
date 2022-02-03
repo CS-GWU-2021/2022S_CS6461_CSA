@@ -22,9 +22,24 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CISC6461.py" />
+    <Compile Include="CPU\registers.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CPU\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GUI.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="memory.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tools.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CPU\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
