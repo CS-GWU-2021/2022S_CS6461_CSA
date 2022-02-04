@@ -31,6 +31,9 @@
     <Compile Include="GUI.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="instruction.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="memory.py">
       <SubType>Code</SubType>
     </Compile>

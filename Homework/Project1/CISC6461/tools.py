@@ -5,17 +5,15 @@ def zero_gene(bit_num):
         value.append('0')
     return value
 
+def fill_up_str(str, num):
+    length = num-len(str)
+    tmp = ''.join(['0']*length)
+    return tmp + str
 
-def split_each_bit(str_value):
-    value = []
-    for i in str_value:
-        value.append(i)
-    return value
-
-def buqi(str_value):
-    length = 16-len(str_value)
-    txt = ''.join(['0']*length)
-    return txt+str_value
+def fill_up_strlist(strlist, num):
+    length = num - len(strlist)
+    tmp = ['0']*length
+    return tmp + strlist
 
 def txt_split(num_txt):
     txt=[]
@@ -57,7 +55,7 @@ def sample():
     for i in range (1,len(line)-1,2):
         add, value = str(int(line[i-1],16)), bin(int(line[i],16))
         value = value[2:]
-        value = buqi(value)
+        value = fill_up_16_str(value)
         print('Line-----------------------------------------------')
         print('add: '+ bin(int(add))[2:] + '\tvalue: ' + print_value(value))
         print('add: '+ add + '\t\tvalue: ' + print_ins(value))

@@ -9,21 +9,35 @@ class Register:
     Parameters:
     --------------
     size : int type; the size of the register
-    value: str_list type; the value of the register
+    value: str type; the value of the register
     label: str type; the kind of the register
     """
     def __init__(self, size=0, label=''):
         self.size = size
-        self.value = ['0'] * self.size
+        self.value = '0' * self.size
         self.label = label
 
     def check_overflow(self, input_value) -> bool:
         """This function returns True when register overflows
         Parameters:
         ------------
-        input_value: str_list type; input value
+        input_value: str type; input value
         """
         return True if len(input_value) > self.size else False
+
+    def add_2(self, adder : str):
+        temp = bin(int(self.value,2) + int(adder,2))[2:]
+        if self.check_overflow(temp) != True:
+            self.value = temp
+        else:
+            print(self.label + ' overflow error')
+
+    def add_10(self, adder : int):
+        temp = bin(int(self.value,2) + adder)[2:]
+        if self.check_overflow(temp) != True:
+            self.value = temp
+        else:
+            print(self.label + ' overflow error')
 
 class PC(Register):
     """This is the class of Program Counter

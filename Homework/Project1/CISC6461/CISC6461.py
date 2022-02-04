@@ -2,12 +2,15 @@ import tkinter
 from GUI import *
 from CPU.registers import *
 from memory import *
+from instruction import *
 import tools
 
 if __name__ == '__main__':
     # initialize memory
     mem = Memory()
-
+    # initialize an instruction object
+    ins = Instruction()
+    print(ins.value)
     # initialize registers
     pc = PC()
     mar = MAR()
@@ -24,8 +27,7 @@ if __name__ == '__main__':
 
     # initialize tkinter
     window = Tk()
-    registers = []
-    app = Window(window, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem)
-
+    app = Window(window, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem, ins)
     # show window
     window.mainloop()
+    
