@@ -1,20 +1,3 @@
-# generate zeros
-def zero_gene(bit_num):
-    value=[]
-    for i in range(bit_num):
-        value.append('0')
-    return value
-
-def fill_up_str(str, num):
-    length = num-len(str)
-    tmp = ''.join(['0']*length)
-    return tmp + str
-
-def fill_up_strlist(strlist, num):
-    length = num - len(strlist)
-    tmp = ['0']*length
-    return tmp + strlist
-
 def txt_split(num_txt):
     txt=[]
     part = int(len(num_txt)/4)
@@ -40,6 +23,8 @@ def decode_opcode(opcode):
         return 'LDX'
     elif op == 34:
         return 'STX'
+    else:
+        return 'VAL'
 def decode_gpr(gpr):
     gpr = int(gpr,2)
     return 'R'+str(gpr)
@@ -50,12 +35,13 @@ def print_value(txt):
 
 # sample
 def sample():
-    line = '0006 040e 0007 080f 0008 844f 0009 8850 000A 0d54 000B 0660 000C 0a74 000D 0000 000E 0014 0014 0028 0028 0050'
+    line = '0008 000A 0009 0100 000A 84A8 000B 84C9 000C 0428 000D 0029 000E 0E00 000F 0A10 0010 FFFF 0100 0008'
     line = line.split(' ')
-    for i in range (1,len(line)-1,2):
+    for i in range (1,len(line),2):
+        print(i)
         add, value = str(int(line[i-1],16)), bin(int(line[i],16))
         value = value[2:]
-        value = fill_up_16_str(value)
+        value = value.zfill(16)
         print('Line-----------------------------------------------')
         print('add: '+ bin(int(add))[2:] + '\tvalue: ' + print_value(value))
         print('add: '+ add + '\t\tvalue: ' + print_ins(value))

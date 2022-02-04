@@ -216,7 +216,6 @@ class Window():
         self.txt_mem_info = st.ScrolledText(self.frame4,relief=text_box_style)
         self.txt_mem_info.grid(row=1,column=1,columnspan=4,sticky=W+E+S+N)   
         
-
     # split each 4 digits
     # only for value of registers (only for multiples of 4)
     def txt_split(self, num_txt):

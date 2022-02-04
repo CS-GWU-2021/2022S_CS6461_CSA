@@ -25,6 +25,7 @@ if __name__ == '__main__':
     x2 = IXR(label='IXR2')
     x3 = IXR(label='IXR3')
 
+    tools.sample()
     # initialize tkinter
     window = Tk()
     app = Window(window, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem, ins)
