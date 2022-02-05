@@ -1,3 +1,6 @@
+#-----------------------------------------------
+# This is a temp workspace
+#-----------------------------------------------
 def txt_split(num_txt):
     txt=[]
     part = int(len(num_txt)/4)

@@ -1,13 +1,12 @@
+#-------------------------------------------------------
+# This file contains the class of Window
+# It does most of computation
+#------------------------------------------------------
 from tkinter import *
 from tkinter.scrolledtext import ScrolledText
 from CPU.registers import *
 from instruction import *
 from memory import *
-from tools import *
-
-'''
-Under Construction
-'''
 
 class Window():
     def __init__(self, master, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem, ins):
@@ -46,8 +45,8 @@ class Window():
         # set layout
         self.set_window(gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem)
 
-    # Interface layout
     def set_window(self, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem):
+        """This functin sets the layout of the window"""
         # GUI setting para
         win_title = 'CSCI6461'
         win_size = '1600x900'
@@ -73,12 +72,11 @@ class Window():
         self.master.grid_rowconfigure(2,weight=0, minsize=100)
         self.master.grid_rowconfigure(3,weight=1)
 
-
         # Frame 1
         self.frame1 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin, pady=win_margin)
         self.frame1.grid(row=0, column=0, sticky=W+E, padx=win_margin, pady=win_margin)
         
-        # setting layout of frame 1
+        # setting layout of Frame 1
         self.frame1.grid_columnconfigure(1, weight=1, minsize=50)
         self.frame1.grid_columnconfigure(4, weight=1, minsize=50)
         for i in range(0,7):
@@ -106,7 +104,6 @@ class Window():
         txt_IXR1 = Label(self.frame1, textvariable = self.txt_value_IXR1, relief=text_box_style).grid(row=4,column=1,sticky=W+E)
         txt_IXR2 = Label(self.frame1, textvariable = self.txt_value_IXR2, relief=text_box_style).grid(row=5,column=1,sticky=W+E)
         txt_IXR3 = Label(self.frame1, textvariable = self.txt_value_IXR3, relief=text_box_style).grid(row=6,column=1,sticky=W+E)
-
         txt_PC = Label(self.frame1, textvariable = self.txt_value_PC, relief=text_box_style).grid(row=0,column=4,sticky=W+E)
         txt_MAR = Label(self.frame1, textvariable = self.txt_value_MAR, relief=text_box_style).grid(row=1,column=4,sticky=W+E)
         txt_MBR = Label(self.frame1, textvariable = self.txt_value_MBR, relief=text_box_style).grid(row=2,column=4,sticky=W+E)
@@ -130,7 +127,7 @@ class Window():
         self.frame2 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin, pady=win_margin)
         self.frame2.grid(row=1, column=0, sticky=W+E, padx=win_margin, pady=win_margin)
 
-        # setting layout of frame 1
+        # setting layout of Frame 2
         for i in range(16):
             self.frame2.grid_columnconfigure(i,weight=1, minsize=20)
         for i in range(3):
@@ -177,7 +174,6 @@ class Window():
         btn_st_plus = Button(self.frame3, text='St+',width=interact_btn_width, command = lambda: self.func_st_plus(mar, mbr, mem)).grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
         btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = lambda: self.func_load(mar, mbr, mem)).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
         btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,padx=10,pady=5,sticky=W+E)
-        
         btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(mem, pc, mar, mbr, ir, True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
         btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = lambda: self.func_run(mem, pc, mar, mbr, ir)).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
         btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = lambda: self.func_ipl(pc, mem)).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
@@ -185,9 +181,10 @@ class Window():
         # Frame4
         self.frame4 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin,pady=win_margin)
         self.frame4.grid(row=3,column=0,sticky=W+E+N+S,padx=win_margin,pady=win_margin)
+
+        # setting layout of Frame 4
         self.frame4.rowconfigure(0,weight=0,minsize=20)
-        self.frame4.rowconfigure(1,weight=1,minsize=30)
-        
+        self.frame4.rowconfigure(1,weight=1,minsize=30)       
         self.frame4.columnconfigure(0,weight=1, minsize=50)
         self.frame4.columnconfigure(1,weight=1, minsize=100)
         self.frame4.columnconfigure(2,weight=1, minsize=50)
@@ -214,11 +211,13 @@ class Window():
         self.txt_ipl_info.insert(INSERT, 'Please press IPL to pre-load the program')
 
 
-
-    # split each 4 digits
-    # only for value of registers (only for multiples of 4)
     def txt_split(self, num_txt):
+        """This function splits '00000000' into '0000 0000'
+        It only works for str with the length of multiples of 4
+        """
         txt = []
+        if len(num_txt)%4 != 0:
+            return num_txt
         part = int(len(num_txt)/4)
         for i in range(part):
             start = i*4
@@ -226,6 +225,7 @@ class Window():
         return ' '.join(txt)
 
     def reset(self):
+        """This function resets all of the system"""
         self.mem.reset_memory()
         for i in self.registers:
             i.reset() 
@@ -241,9 +241,8 @@ class Window():
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT, 'System Is Ready')
         
-
-    # function for refreshing text of instruction
     def refresh_instruction_info(self):
+        """This function refreshes the text of instruction"""
         space = '\t   '
         self.txt_value_Opcode.set(space.join(list(self.ins_object.opcode)))
         self.txt_value_GPR_index.set(space.join(list(self.ins_object.gpr_index)))
@@ -251,8 +250,8 @@ class Window():
         self.txt_value_Indirect.set(space.join(list(self.ins_object.indirect)))
         self.txt_value_Address.set(space.join(list(self.ins_object.address)))
 
-    # function for refreshing the mem_info
     def refresh_mem_info(self):
+        """This function refreshes the mem_info"""
         content = ''
         self.txt_mem_info.delete(1.0, END)
         for i in self.registers:
@@ -261,14 +260,14 @@ class Window():
             content += str(i) + ':\t' + str(int(self.mem.memory[i])) + '\n'
         self.txt_mem_info.insert(INSERT, content)
 
-    # function for refreshing the text of register:
     def refresh_reg_info(self):
+        """This function refreshes the text of tegisters"""
         length = len(self.registers)
         for i in range(length):
             self.txt_value_registers[i].set(self.txt_split(self.registers[i].value.zfill(self.registers[i].size)))
 
-    # function for btn_of_instructions: press button to set bit into 1 or 0
     def func_instruction(self, index):
+        """This function sets the bit of the instruction into 1 or 0"""
         print("button "+str(index)+" is pressed")
         temp = list(self.ins_object.value)
         if temp[index] == '1':
@@ -279,8 +278,8 @@ class Window():
         self.ins_object.update()
         self.refresh_instruction_info()
 
-    # function for btn_register_load: press to load instruction value into register
     def func_reg_load(self, reg : Register):
+        """This function loads the value of instruciton into a register"""
         print("button "+ reg.label+" is pressed")
         self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, 'Load value to ' + reg.label + ':\n')
@@ -289,8 +288,8 @@ class Window():
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT, reg.label + ' <- ' + str(int(reg.value)))
         
-    # function for btn_load: press to load value of mem[MAR] into MBR
     def func_load(self, mar : MAR, mbr : MBR, mem : Memory):
+        """This function loads the value of MEM[MAR] into MBR"""
         print('button Load is pressed')
         self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, 'Load from Memory:\n\n')
@@ -300,8 +299,8 @@ class Window():
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT,  'MBR = MEM[' + str(int(mar.value,2)) + '] = ' + str(int(mbr.value)) + '\n')
 
-    # function for btn_store: press to store value of MBR into mem[MAR]
     def func_store(self, mar : MAR, mbr : MBR, mem : Memory):
+        """This function stores the value of MBR into MEM[MAR]"""
         print('button Store is pressed')
         self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, 'Store into Memory:\n\n')
@@ -310,8 +309,8 @@ class Window():
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT,  'MEM['+ str(int(mar.value,2)) + '] = ' + str(int(mem.memory[int(mar.value,2)])) + '\n')
 
-    # function for btn_store_plus: store value of MBR into mem[MAR] and MAR++
     def func_st_plus(self, mar : MAR, mbr : MBR, mem : Memory):
+        """This function stores the value of MBR into MEM[MAR] and MAR++"""
         print('button S+ is pressed')
         self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, 'Store-plus:\n\n')
@@ -325,8 +324,8 @@ class Window():
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT, 'MAR = ' + str(int(mar.value)) + '\n')
 
-    # function for btn_ipl: reset all system and pre-load the ipl.txt
     def func_ipl(self, pc : PC, mem = Memory):
+        """This function reset the system and pre-load the ipl.txt"""
         self.reset()
         self.txt_ipl_info.delete(1.0, END)
         self.txt_step_info.delete(1.0, END)
@@ -344,15 +343,15 @@ class Window():
             # step_info update
             self.txt_step_info.insert(INSERT, 'MEM[' + str(add) + '] = ' + value + '\n')
 
-        # set pc (6 by default)
+        # set pc (10 by default)
         pc.value = '1010'
         self.txt_step_info.insert(INSERT, 'PC has been set to ' + pc.value)
         # mem_info refresh
         self.refresh_mem_info()
         self.refresh_reg_info()
 
-    # funtion for btn_ss: excute the instruction on the mem[PC]
     def func_ss(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR, if_clean : bool):
+        """This function implenments single step"""
         print('button ss is pressed')
         if if_clean:
             self.txt_step_info.delete(1.0, END)
@@ -377,6 +376,8 @@ class Window():
         word = Instruction(ir.value)
         op = int(word.opcode,2)
         gpr = self.gprs[int(word.gpr_index,2)]
+
+        # Halt
         if op == 0:
             self.txt_step_info.insert(INSERT, 'Program is done\n\n')
             return False
@@ -466,7 +467,6 @@ class Window():
             # MEM[MAR] <- MBR
             mbr.store_to_mem(mar, mem)
             self.txt_step_info.insert(INSERT, 'MEM['+ str(int(mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(mar.value,2)) + '] = ' + mem.memory[int(mar.value,2)] + '\n')
-
             
         # PC++
         pc.add_10(1)
@@ -475,8 +475,8 @@ class Window():
         self.refresh_mem_info()
         return True
 
-    # function for btn_run: excute the program
     def func_run(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR):
+        """This function implements RUN"""
         if_run = True
         self.txt_step_info.delete(1.0, END)
         while if_run:

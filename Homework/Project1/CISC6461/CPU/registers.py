@@ -26,6 +26,11 @@ class Register:
         return True if len(input_value) > self.size else False
 
     def add_2(self, adder : str):
+        """This function adds a binary value to the register
+        Parameters:
+        ------------
+        adder: the binary number that going to be added to
+        """
         temp = bin(int(self.value,2) + int(adder,2))[2:]
         if self.check_overflow(temp) != True:
             self.value = temp
@@ -33,6 +38,11 @@ class Register:
             print(self.label + ' overflow error')
 
     def add_10(self, adder : int):
+        """This function adds a decimal value to the register
+        Parameters:
+        ------------
+        adder: the decimal number that going to be added to
+        """
         temp = bin(int(self.value,2) + adder)[2:]
         if self.check_overflow(temp) != True:
             self.value = temp
@@ -61,6 +71,8 @@ class MAR(Register):
         super().__init__(size=size, label=label)
 
     def get_from_PC(self, pc : PC):
+        """The function for MAR <- PC
+        """
         self.value = pc.value
 
 class MBR(Register):
@@ -71,10 +83,14 @@ class MBR(Register):
         super().__init__(size=size, label=label)
 
     def load_from_mem(self, mar : MAR, mem : Memory):
+        """The function for MBR <- MEM[MAR]
+        """
         address = int(''.join(mar.value),2)
         self.value = mem.get_from_memory(address)
 
     def store_to_mem(self, mar : MAR, mem : Memory):
+        """The function for MEM[MAR] <- MBR
+        """
         address = int(''.join(mar.value),2)
         mem.set_to_memory(address,self.value)
 
@@ -86,6 +102,8 @@ class IR(Register):
         super().__init__(size=size, label=label)
 
     def get_from_MBR(self, mbr : MBR):
+        """The function for IR <- MBR
+        """
         self.value = mbr.value
 
 class CC(Register):
