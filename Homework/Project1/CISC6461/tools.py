@@ -38,7 +38,6 @@ def sample():
     line = '0008 000A 0009 0100 000A 84A8 000B 84C9 000C 0428 000D 0029 000E 0E00 000F 0A10 0010 FFFF 0100 0008'
     line = line.split(' ')
     for i in range (1,len(line),2):
-        print(i)
         add, value = str(int(line[i-1],16)), bin(int(line[i],16))
         value = value[2:]
         value = value.zfill(16)

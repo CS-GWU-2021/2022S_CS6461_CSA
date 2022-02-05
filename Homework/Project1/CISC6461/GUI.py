@@ -178,7 +178,7 @@ class Window():
         btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = lambda: self.func_load(mar, mbr, mem)).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
         btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,padx=10,pady=5,sticky=W+E)
         
-        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(mem, pc, mar, mbr, ir)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
+        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(mem, pc, mar, mbr, ir, True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
         btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = lambda: self.func_run(mem, pc, mar, mbr, ir)).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
         btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = lambda: self.func_ipl(pc, mem)).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
 
@@ -340,35 +340,33 @@ class Window():
             # mem[add] <- value
             temp = i.split(' ')
             add, value = int(temp[0],16),bin(int(temp[1][0:4],16))[2:]
-            print(type(value),value)
             mem.set_to_memory(add,value)
             # step_info update
             self.txt_step_info.insert(INSERT, 'MEM[' + str(add) + '] = ' + value + '\n')
 
         # set pc (6 by default)
-        pc.value = '110'
-        self.txt_step_info.insert(INSERT, 'PC has been set to 0110')
+        pc.value = '1010'
+        self.txt_step_info.insert(INSERT, 'PC has been set to ' + pc.value)
         # mem_info refresh
         self.refresh_mem_info()
         self.refresh_reg_info()
 
     # funtion for btn_ss: excute the instruction on the mem[PC]
-    def func_ss(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR):
+    def func_ss(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR, if_clean : bool):
         print('button ss is pressed')
-        self.txt_step_info.delete(1.0, END)
-        self.txt_step_info.insert(INSERT, 'Single Step: PC = ' + pc.value + '\n\n')
+        if if_clean:
+            self.txt_step_info.delete(1.0, END)
+        self.txt_step_info.insert(INSERT, '-------------------------------------------------\n')
+        self.txt_step_info.insert(INSERT, 'Step: PC = ' + pc.value + '\n\n')
 
         # Fetch Instruction
         self.txt_step_info.insert(INSERT, 'Fetch Instruction \n')
         # MAR <- PC
         mar.get_from_PC(pc)
         self.txt_step_info.insert(INSERT, 'MAR <- PC :\t\t\tMAR = ' + mar.value + '\n')
-        # PC++
-        pc.add_10(1)
-        self.txt_step_info.insert(INSERT, 'PC++ :\t\t\tPC = ' + pc.value + '\n')
         # MBR <- mem[MAR]
         mbr.load_from_mem(mar,mem)
-        self.txt_step_info.insert(INSERT, 'MBR <- MEM[MAR] :\t\t\tMBR = ' + mbr.value + '\n')
+        self.txt_step_info.insert(INSERT, 'MBR <- MEM['+ str(int(mar.value,2)) + '] :\t\t\tMBR = ' + mbr.value + '\n')
         # IR <- MBR
         ir.get_from_MBR(mbr)
         self.txt_step_info.insert(INSERT, 'IR <- MBR :\t\t\tIR = ' + ir.value + '\n\n')
@@ -377,20 +375,26 @@ class Window():
         # Decode
         self.txt_step_info.insert(INSERT, 'Decode Instruction \n')
         word = Instruction(ir.value)
+        op = int(word.opcode,2)
+        gpr = self.gprs[int(word.gpr_index,2)]
+        if op == 0:
+            self.txt_step_info.insert(INSERT, 'Program is done\n\n')
+            return False
         self.txt_step_info.insert(INSERT, 'Instruction :\t\t\t' + word.print_out() + '\n\n')
+
 
         # Locate
         self.txt_step_info.insert(INSERT, 'Locate EA \n')
         # IAR <- ADD
         iar = Register(12, 'IAR')
-        iar.value = word.address
+        iar.value = str(int(word.address))
         self.txt_step_info.insert(INSERT, 'IAR <- Add :\t\t\tIAR = ' + iar.value + '\n')
         # IAR += X[IXR] if IXR = 1 or 2 or 3
         ixr_id = int(word.ixr_index,2)
         if ixr_id != 0:
             ixr = self.xs[ixr_id-1]
             iar.add_2(ixr.value)
-            self.txt_step_info.insert(INSERT, 'IAR <- ' + ixr.label + ' :\t\t\tIAR = ' + iar.value + '\n')
+            self.txt_step_info.insert(INSERT, 'IAR += ' + ixr.label + ' :\t\t\tIAR = ' + iar.value + '\n')
         # IAR <- MEM[IAR] if I = 1
         if int(word.indirect,2) == 1:
             add = int(iar.value,2)
@@ -402,36 +406,78 @@ class Window():
 
         # Excute and Deposit
         self.txt_step_info.insert(INSERT, 'Excute and Deposit Result \n')
-        # LDR op=1
-        op = int(word.opcode,2)
+        
+
+        irr = Register(16,'IRR')
+        # LDR
         if op == 1:
             # MBR <- MEM[MAR]
             mbr.load_from_mem(mar,mem)
-            self.txt_step_info.insert(INSERT, 'MBR <- MEM[MAR] :\t\t\tMBR = ' + mbr.value + '\n')
-            # IRR <- MBR
-            irr = Register(16,'IRR')
+            self.txt_step_info.insert(INSERT, 'MBR <- MEM['+ str(int(mar.value,2)) + '] :\t\t\tMBR = ' + mbr.value + '\n')
+            # IRR <- MBR           
             irr.value = mbr.value
             self.txt_step_info.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
             # R[GPR] <- IRR
-            gpr = self.gprs[int(word.gpr_index,2)]
             gpr.value = irr.value
             self.txt_step_info.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
         # STR
         elif op == 2:
-            pass
+            # IRR <- R[GPR]
+            irr.value = gpr.value
+            self.txt_step_info.insert(INSERT, 'IRR <- ' + gpr.label + ' :\t\t\tIRR = ' + irr.value + '\n')
+            # MBR <- IRR
+            mbr.value = irr.value
+            self.txt_step_info.insert(INSERT, 'MBR <- IRR :\t\t\tMBR = ' + mbr.value + '\n')
+            # MEM[MAR] <- MBR
+            mbr.store_to_mem(mar, mem)
+            self.txt_step_info.insert(INSERT, 'MEM['+ str(int(mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(mar.value,2)) + '] = ' + mem.memory[int(mar.value,2)] + '\n')
         # LDA
         elif op == 3:
-            pass
+            # MBR <- MAR
+            mbr.value = mar.value
+            self.txt_step_info.insert(INSERT, 'MBR <- MAR : \t\t\tMBR = ' + mbr.value + '\n')
+            # IRR <- MBR
+            irr.value = mbr.value
+            self.txt_step_info.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
+            # R[GPR] <- IRR
+            gpr.value = irr.value
+            self.txt_step_info.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
         # LDX
         elif op == 33:
-            pass
+            # MBR <- MEM[MAR]
+            mbr.load_from_mem(mar,mem)
+            self.txt_step_info.insert(INSERT, 'MBR <- MEM['+ str(int(mar.value,2)) + '] :\t\t\tMBR = ' + mbr.value + '\n')
+            # IRR <- MBR           
+            irr.value = mbr.value
+            self.txt_step_info.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
+            # X[IXR] <- IRR
+            ixr = self.xs[ixr_id-1]
+            ixr.value = irr.value
+            self.txt_step_info.insert(INSERT, ixr.label + ' <- IRR :\t\t\t' + ixr.label + ' = ' + ixr.value + '\n')          
         # STX
         elif op == 34:
-            pass
+            # IRR <- X[IXR]
+            ixr = self.xs[ixr_id-1]
+            irr.value = ixr.value
+            self.txt_step_info.insert(INSERT, 'IRR <- ' + ixr.label + ' :\t\t\tIRR = ' + irr.value + '\n')
+            # MBR <- IRR
+            mbr.value = irr.value
+            self.txt_step_info.insert(INSERT, 'MBR <- IRR :\t\t\tMBR = ' + mbr.value + '\n')
+            # MEM[MAR] <- MBR
+            mbr.store_to_mem(mar, mem)
+            self.txt_step_info.insert(INSERT, 'MEM['+ str(int(mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(mar.value,2)) + '] = ' + mem.memory[int(mar.value,2)] + '\n')
 
+            
+        # PC++
+        pc.add_10(1)
+        self.txt_step_info.insert(INSERT, '\nPC++ :\t\t\tPC = ' + pc.value + '\n')
         self.refresh_reg_info()
         self.refresh_mem_info()
+        return True
 
     # function for btn_run: excute the program
     def func_run(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR):
-        pass
+        if_run = True
+        self.txt_step_info.delete(1.0, END)
+        while if_run:
+            if_run = self.func_ss(mem,pc,mar,mbr,ir,False)
