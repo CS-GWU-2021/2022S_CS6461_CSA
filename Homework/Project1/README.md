@@ -49,3 +49,6 @@ Load/Store Instruction:
 |--------|-----------|-------|-------------------|-----------|
 |01|LDR r, x, address|LDR 3,0,31|000001 11 00 0 11111|Load GPR3 with the contents of the memory 31|
 |02|STR r, x, address|STR 2,0,16|000002 10 00 0 10000|Store GPR2 with the contents of the memory 16|
+
+User Interface Foresight:
+![UI](https://github.com/CS-GWU-2021/2022S_CS6461_CSA/blob/main/Homework/Project1/user%20interface.png)
