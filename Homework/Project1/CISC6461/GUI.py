@@ -416,6 +416,18 @@ class Window():
             gpr = self.gprs[int(word.gpr_index,2)]
             gpr.value = irr.value
             self.txt_step_info.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
+        # STR
+        elif op == 2:
+            pass
+        # LDA
+        elif op == 3:
+            pass
+        # LDX
+        elif op == 33:
+            pass
+        # STX
+        elif op == 34:
+            pass
 
         self.refresh_reg_info()
         self.refresh_mem_info()
