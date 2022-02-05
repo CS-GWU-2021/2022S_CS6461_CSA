@@ -1,6 +1,7 @@
 from tkinter import *
-from tkinter import scrolledtext as st
+from tkinter.scrolledtext import ScrolledText
 from CPU.registers import *
+from instruction import *
 from memory import *
 from tools import *
 
@@ -12,12 +13,11 @@ class Window():
     def __init__(self, master, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem, ins):
         self.master = master
         self.registers = [gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr]
+        self.xs = [x1,x2,x3]
+        self.gprs = [gpr0, gpr1, gpr2, gpr3]
         self.mem = mem
         self.ins_object = ins
-
-        # initialize txt value 
-        self.value_step_info = self.value_mem_info = 'Initialize the app'
-        
+      
         # parameters to update the label widget
         self.txt_value_GPR0 = StringVar()
         self.txt_value_GPR1 = StringVar()
@@ -31,33 +31,17 @@ class Window():
         self.txt_value_MBR = StringVar()
         self.txt_value_IR = StringVar()
         self.txt_value_MFR = StringVar()
-
-        self.txt_value_GPR0.set(self.txt_split(gpr0.value))
-        self.txt_value_GPR1.set(self.txt_split(gpr1.value))
-        self.txt_value_GPR2.set(self.txt_split(gpr2.value))
-        self.txt_value_GPR3.set(self.txt_split(gpr3.value))
-        self.txt_value_IXR1.set(self.txt_split(x1.value))
-        self.txt_value_IXR2.set(self.txt_split(x2.value))
-        self.txt_value_IXR3.set(self.txt_split(x2.value))
-        self.txt_value_PC.set(self.txt_split(pc.value))
-        self.txt_value_MAR.set(self.txt_split(mar.value))
-        self.txt_value_MBR.set(self.txt_split(mbr.value))
-        self.txt_value_IR.set(self.txt_split(ir.value))
-        self.txt_value_MFR.set(self.txt_split(mfr.value))
+        self.txt_value_registers = [self.txt_value_GPR0,self.txt_value_GPR1,self.txt_value_GPR2,self.txt_value_GPR3,
+                                    self.txt_value_IXR1,self.txt_value_IXR2,self.txt_value_IXR3,
+                                    self.txt_value_PC,self.txt_value_MAR,self.txt_value_MBR,self.txt_value_IR,self.txt_value_MFR]
+        self.refresh_reg_info()
 
         self.txt_value_Opcode = StringVar()
-        self.txt_value_Opcode.set(list(self.ins_object.opcode))
         self.txt_value_GPR_index = StringVar()
-        self.txt_value_GPR_index.set(list(self.ins_object.gpr_index))
         self.txt_value_IXR_index = StringVar()
-        self.txt_value_IXR_index.set(list(self.ins_object.ixr_index))
         self.txt_value_Indirect = StringVar()
-        self.txt_value_Indirect.set(list(self.ins_object.indirect))
         self.txt_value_Address = StringVar()
-        self.txt_value_Address.set(list(self.ins_object.address))
-
-        self.mem_info = StringVar()
-        self.mem_info.set(self.value_mem_info)
+        self.refresh_instruction_info()
 
         # set layout
         self.set_window(gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem)
@@ -130,16 +114,16 @@ class Window():
         txt_MFR = Label(self.frame1,textvariable = self.txt_value_MFR, relief=text_box_style).grid(row=4,column=4,sticky=W+E)
 
         # LD button of registers
-        btn_GPR0 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_GPR0, gpr0)).grid(row=0,column=2)
-        btn_GPR1 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_GPR1, gpr1)).grid(row=1,column=2)
-        btn_GPR2 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_GPR2, gpr2)).grid(row=2,column=2)
-        btn_GPR3 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_GPR3, gpr3)).grid(row=3,column=2)
-        btn_IXR1 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_IXR1, x1)).grid(row=4,column=2)
-        btn_IXR2 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_IXR2, x2)).grid(row=5,column=2)
-        btn_IXR3 = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_IXR3, x3)).grid(row=6,column=2)
-        btn_PC = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_PC, pc)).grid(row=0,column=5)
-        btn_MAR = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_MAR, mar)).grid(row=1,column=5)
-        btn_MBR = Button(self.frame1, text='LD', command = lambda: self.func_btn_reg_load(self.txt_value_MBR, mbr)).grid(row=2,column=5)
+        btn_GPR0 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr0)).grid(row=0,column=2)
+        btn_GPR1 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr1)).grid(row=1,column=2)
+        btn_GPR2 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr2)).grid(row=2,column=2)
+        btn_GPR3 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr3)).grid(row=3,column=2)
+        btn_IXR1 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(x1)).grid(row=4,column=2)
+        btn_IXR2 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(x2)).grid(row=5,column=2)
+        btn_IXR3 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(x3)).grid(row=6,column=2)
+        btn_PC = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(pc)).grid(row=0,column=5)
+        btn_MAR = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(mar)).grid(row=1,column=5)
+        btn_MBR = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(mbr)).grid(row=2,column=5)
 
 
         # Frame2
@@ -167,22 +151,22 @@ class Window():
         txt_Address = Label(self.frame2, textvariable=self.txt_value_Address, relief=text_box_style).grid(row=1,column=11,columnspan=5,sticky=W+E)
 
         # button of Instruction: to set corresponding value to 1 or 0       
-        btn_Ope0 = Button(self.frame2, text='0',width=instruction_btn_width, command = lambda: self.func_btn_instruction(0)).grid(row=2,column=0)
-        btn_Ope1 = Button(self.frame2, text='1',width=instruction_btn_width, command = lambda: self.func_btn_instruction(1)).grid(row=2,column=1)
-        btn_Ope2 = Button(self.frame2, text='2',width=instruction_btn_width, command = lambda: self.func_btn_instruction(2)).grid(row=2,column=2)
-        btn_Ope3 = Button(self.frame2, text='3',width=instruction_btn_width, command = lambda: self.func_btn_instruction(3)).grid(row=2,column=3)
-        btn_Ope4 = Button(self.frame2, text='4',width=instruction_btn_width, command = lambda: self.func_btn_instruction(4)).grid(row=2,column=4)
-        btn_Ope5 = Button(self.frame2, text='5',width=instruction_btn_width, command = lambda: self.func_btn_instruction(5)).grid(row=2,column=5)
-        btn_GPR6 = Button(self.frame2, text='6',width=instruction_btn_width, command = lambda: self.func_btn_instruction(6)).grid(row=2,column=6)
-        btn_GPR7 = Button(self.frame2, text='7',width=instruction_btn_width, command = lambda: self.func_btn_instruction(7)).grid(row=2,column=7)
-        btn_IXR8 = Button(self.frame2, text='8',width=instruction_btn_width, command = lambda: self.func_btn_instruction(8)).grid(row=2,column=8)
-        btn_IXR9 = Button(self.frame2, text='9',width=instruction_btn_width, command = lambda: self.func_btn_instruction(9)).grid(row=2,column=9)
-        btn_I10 = Button(self.frame2, text='10',width=instruction_btn_width, command = lambda: self.func_btn_instruction(10)).grid(row=2,column=10)
-        btn_Add11 = Button(self.frame2, text='11',width=instruction_btn_width, command = lambda: self.func_btn_instruction(11)).grid(row=2,column=11)
-        btn_Add12 = Button(self.frame2, text='12',width=instruction_btn_width, command = lambda: self.func_btn_instruction(12)).grid(row=2,column=12)
-        btn_Add13 = Button(self.frame2, text='13',width=instruction_btn_width, command = lambda: self.func_btn_instruction(13)).grid(row=2,column=13)
-        btn_Add14 = Button(self.frame2, text='14',width=instruction_btn_width, command = lambda: self.func_btn_instruction(14)).grid(row=2,column=14)
-        btn_Add15 = Button(self.frame2, text='15',width=instruction_btn_width, command = lambda: self.func_btn_instruction(15)).grid(row=2,column=15)
+        btn_Ope0 = Button(self.frame2, text='0',width=instruction_btn_width, command = lambda: self.func_instruction(0)).grid(row=2,column=0)
+        btn_Ope1 = Button(self.frame2, text='1',width=instruction_btn_width, command = lambda: self.func_instruction(1)).grid(row=2,column=1)
+        btn_Ope2 = Button(self.frame2, text='2',width=instruction_btn_width, command = lambda: self.func_instruction(2)).grid(row=2,column=2)
+        btn_Ope3 = Button(self.frame2, text='3',width=instruction_btn_width, command = lambda: self.func_instruction(3)).grid(row=2,column=3)
+        btn_Ope4 = Button(self.frame2, text='4',width=instruction_btn_width, command = lambda: self.func_instruction(4)).grid(row=2,column=4)
+        btn_Ope5 = Button(self.frame2, text='5',width=instruction_btn_width, command = lambda: self.func_instruction(5)).grid(row=2,column=5)
+        btn_GPR6 = Button(self.frame2, text='6',width=instruction_btn_width, command = lambda: self.func_instruction(6)).grid(row=2,column=6)
+        btn_GPR7 = Button(self.frame2, text='7',width=instruction_btn_width, command = lambda: self.func_instruction(7)).grid(row=2,column=7)
+        btn_IXR8 = Button(self.frame2, text='8',width=instruction_btn_width, command = lambda: self.func_instruction(8)).grid(row=2,column=8)
+        btn_IXR9 = Button(self.frame2, text='9',width=instruction_btn_width, command = lambda: self.func_instruction(9)).grid(row=2,column=9)
+        btn_I10 = Button(self.frame2, text='10',width=instruction_btn_width, command = lambda: self.func_instruction(10)).grid(row=2,column=10)
+        btn_Add11 = Button(self.frame2, text='11',width=instruction_btn_width, command = lambda: self.func_instruction(11)).grid(row=2,column=11)
+        btn_Add12 = Button(self.frame2, text='12',width=instruction_btn_width, command = lambda: self.func_instruction(12)).grid(row=2,column=12)
+        btn_Add13 = Button(self.frame2, text='13',width=instruction_btn_width, command = lambda: self.func_instruction(13)).grid(row=2,column=13)
+        btn_Add14 = Button(self.frame2, text='14',width=instruction_btn_width, command = lambda: self.func_instruction(14)).grid(row=2,column=14)
+        btn_Add15 = Button(self.frame2, text='15',width=instruction_btn_width, command = lambda: self.func_instruction(15)).grid(row=2,column=15)
 
         # Frame3
         self.frame3 = Frame(self.master,padx=win_margin,pady=win_margin)
@@ -192,30 +176,45 @@ class Window():
         btn_store = Button(self.frame3, text='Store',width=interact_btn_width, command = lambda: self.func_store(mar, mbr, mem)).grid(row=0,column=0,padx=10,pady=5,sticky=W+E)
         btn_st_plus = Button(self.frame3, text='St+',width=interact_btn_width, command = lambda: self.func_st_plus(mar, mbr, mem)).grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
         btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = lambda: self.func_load(mar, mbr, mem)).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
+        btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,padx=10,pady=5,sticky=W+E)
         
-        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
-        btn_run = Button(self.frame3, text='Run',width=interact_btn_width).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
-        btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
+        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(mem, pc, mar, mbr, ir)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
+        btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = lambda: self.func_run(mem, pc, mar, mbr, ir)).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
+        btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = lambda: self.func_ipl(pc, mem)).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
 
         # Frame4
         self.frame4 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin,pady=win_margin)
         self.frame4.grid(row=3,column=0,sticky=W+E+N+S,padx=win_margin,pady=win_margin)
         self.frame4.rowconfigure(0,weight=0,minsize=20)
         self.frame4.rowconfigure(1,weight=1,minsize=30)
-        self.frame4.columnconfigure(0,weight=1,minsize=50)
-        self.frame4.columnconfigure(1,weight=4,minsize=200)
+        
+        self.frame4.columnconfigure(0,weight=1, minsize=50)
+        self.frame4.columnconfigure(1,weight=1, minsize=100)
+        self.frame4.columnconfigure(2,weight=1, minsize=50)
 
         # label of info 
-        label_load_info = Label(self.frame4, text='Load_Info').grid(row=0,column=0,sticky=W+S+N)
-        label_mem_info = Label(self.frame4, text='Mem_Info').grid(row=0,column=1,sticky=W+S+N)
-        
+        label_step_info = Label(self.frame4, text='Step_Info')
+        label_step_info.grid(row=0,column=0,sticky=W+S+N)
+        label_mem_info = Label(self.frame4, text='Mem_Info')
+        label_mem_info.grid(row=0,column=1,sticky=W+S+N)
+        label_ipl_info = Label(self.frame4, text='IPL_Info')
+        label_ipl_info.grid(row=0,column=2,sticky=W+S+N)
 
         # text box of info
-        txt_step_info = st.ScrolledText(self.frame4,relief=text_box_style)
-        txt_step_info.grid(row=1,column=0,sticky=W+E+S+N)
-        self.txt_mem_info = st.ScrolledText(self.frame4,relief=text_box_style)
-        self.txt_mem_info.grid(row=1,column=1,columnspan=4,sticky=W+E+S+N)   
-        
+        self.txt_step_info = ScrolledText(self.frame4, relief=text_box_style)
+        self.txt_step_info.grid(row=1,column=0,sticky=W+E+S+N)
+        self.txt_step_info.insert(INSERT, 'System Is Ready')
+
+        self.txt_mem_info = ScrolledText(self.frame4, relief=text_box_style)
+        self.txt_mem_info.grid(row=1,column=1, sticky=W+E+S+N)   
+        self.refresh_mem_info()
+
+        self.txt_ipl_info = ScrolledText(self.frame4, relief=text_box_style)
+        self.txt_ipl_info.grid(row=1,column=2,sticky=W+E+S+N)
+        self.txt_ipl_info.insert(INSERT, 'Please press IPL to pre-load the program')
+
+
+
     # split each 4 digits
     # only for value of registers (only for multiples of 4)
     def txt_split(self, num_txt):
@@ -226,8 +225,50 @@ class Window():
             txt.append(num_txt[start:start+4])
         return ' '.join(txt)
 
+    def reset(self):
+        self.mem.reset_memory()
+        for i in self.registers:
+            i.reset() 
+        self.ins_object.reset()
+
+        self.refresh_reg_info()
+        self.refresh_instruction_info()
+
+        self.txt_ipl_info.delete(1.0, END)
+        self.txt_mem_info.delete(1.0, END)
+        self.txt_step_info.delete(1.0, END)
+        self.txt_ipl_info.insert(INSERT, 'Please press IPL to pre-load the program')
+        self.refresh_mem_info()
+        self.txt_step_info.insert(INSERT, 'System Is Ready')
+        
+
+    # function for refreshing text of instruction
+    def refresh_instruction_info(self):
+        space = '\t   '
+        self.txt_value_Opcode.set(space.join(list(self.ins_object.opcode)))
+        self.txt_value_GPR_index.set(space.join(list(self.ins_object.gpr_index)))
+        self.txt_value_IXR_index.set(space.join(list(self.ins_object.ixr_index)))
+        self.txt_value_Indirect.set(space.join(list(self.ins_object.indirect)))
+        self.txt_value_Address.set(space.join(list(self.ins_object.address)))
+
+    # function for refreshing the mem_info
+    def refresh_mem_info(self):
+        content = ''
+        self.txt_mem_info.delete(1.0, END)
+        for i in self.registers:
+            content += i.label + ':\t' + self.txt_split(i.value.zfill(i.size)) +'\n'
+        for i in range(len(self.mem.memory)):
+            content += str(i) + ':\t' + str(int(self.mem.memory[i])) + '\n'
+        self.txt_mem_info.insert(INSERT, content)
+
+    # function for refreshing the text of register:
+    def refresh_reg_info(self):
+        length = len(self.registers)
+        for i in range(length):
+            self.txt_value_registers[i].set(self.txt_split(self.registers[i].value.zfill(self.registers[i].size)))
+
     # function for btn_of_instructions: press button to set bit into 1 or 0
-    def func_btn_instruction(self, index):
+    def func_instruction(self, index):
         print("button "+str(index)+" is pressed")
         temp = list(self.ins_object.value)
         if temp[index] == '1':
@@ -236,48 +277,149 @@ class Window():
             temp[index] = '1'
         self.ins_object.value = ''.join(temp)
         self.ins_object.update()
-        self.txt_value_Opcode.set(list(self.ins_object.opcode))
-        self.txt_value_GPR_index.set(list(self.ins_object.gpr_index))
-        self.txt_value_IXR_index.set(list(self.ins_object.ixr_index))
-        self.txt_value_Indirect.set(list(self.ins_object.indirect))
-        self.txt_value_Address.set(list(self.ins_object.address))
-
-    # function for refresh the mem_info
-    def refresh_mem_info(self):
-        print('button mem_info is pressed')
-        content = ''
-        self.txt_mem_info.delete(1.0, END)
-        for i in self.registers:
-            content += i.label + ': ' + self.txt_split(i.value.zfill(i.size)) +'\n'
-        for i in range(len(self.mem.memory)):
-            content += str(i) + ': ' + str(int(self.mem.memory[i])) + '\n'
-        self.txt_mem_info.insert(INSERT, content)
-
+        self.refresh_instruction_info()
 
     # function for btn_register_load: press to load instruction value into register
-    def func_btn_reg_load(self, REG : StringVar, reg : Register):
+    def func_reg_load(self, reg : Register):
         print("button "+ reg.label+" is pressed")
+        self.txt_step_info.delete(1.0, END)
+        self.txt_step_info.insert(INSERT, 'Load value to ' + reg.label + ':\n')
         reg.value = self.ins_object.value[16-reg.size:16]
-        REG.set(self.txt_split(reg.value))
+        self.refresh_reg_info()
         self.refresh_mem_info()
+        self.txt_step_info.insert(INSERT, reg.label + ' <- ' + str(int(reg.value)))
         
     # function for btn_load: press to load value of mem[MAR] into MBR
     def func_load(self, mar : MAR, mbr : MBR, mem : Memory):
         print('button Load is pressed')
+        self.txt_step_info.delete(1.0, END)
+        self.txt_step_info.insert(INSERT, 'Load from Memory:\n\n')
+        self.txt_step_info.insert(INSERT, 'MBR <- MEM[MAR]:\n')
         mbr.load_from_mem(mar,mem)
-        self.txt_value_MBR.set(self.txt_split(mbr.value.zfill(mbr.size)))
+        self.refresh_reg_info()
         self.refresh_mem_info()
+        self.txt_step_info.insert(INSERT,  'MBR = MEM[' + str(int(mar.value,2)) + '] = ' + str(int(mbr.value)) + '\n')
 
     # function for btn_store: press to store value of MBR into mem[MAR]
     def func_store(self, mar : MAR, mbr : MBR, mem : Memory):
         print('button Store is pressed')
+        self.txt_step_info.delete(1.0, END)
+        self.txt_step_info.insert(INSERT, 'Store into Memory:\n\n')
+        self.txt_step_info.insert(INSERT, 'MEM[MAR] <- MBR:\n')
         mbr.store_to_mem(mar,mem)
         self.refresh_mem_info()
+        self.txt_step_info.insert(INSERT,  'MEM['+ str(int(mar.value,2)) + '] = ' + str(int(mem.memory[int(mar.value,2)])) + '\n')
 
     # function for btn_store_plus: store value of MBR into mem[MAR] and MAR++
     def func_st_plus(self, mar : MAR, mbr : MBR, mem : Memory):
         print('button S+ is pressed')
+        self.txt_step_info.delete(1.0, END)
+        self.txt_step_info.insert(INSERT, 'Store-plus:\n\n')
+        self.txt_step_info.insert(INSERT, 'MEM[MAR] <- MBR:\n')
         mbr.store_to_mem(mar, mem)
+        self.txt_step_info.insert(INSERT,  'MEM['+ str(int(mar.value,2)) + '] = ' + str(int(mem.memory[int(mar.value,2)])) + '\n\n')
+
+        self.txt_step_info.insert(INSERT, 'MAR++:\n')
         mar.add_10(1)
-        self.txt_value_MAR.set(self.txt_split(mar.value.zfill(mar.size)))
+        self.refresh_reg_info()
         self.refresh_mem_info()
+        self.txt_step_info.insert(INSERT, 'MAR = ' + str(int(mar.value)) + '\n')
+
+    # function for btn_ipl: reset all system and pre-load the ipl.txt
+    def func_ipl(self, pc : PC, mem = Memory):
+        self.reset()
+        self.txt_ipl_info.delete(1.0, END)
+        self.txt_step_info.delete(1.0, END)
+        file_dir = './ipl.txt'
+        with open(file_dir, 'r') as f:
+            lines = f.readlines()
+        f.close()
+        for i in lines:
+            # ipl_info update
+            self.txt_ipl_info.insert(INSERT, i)
+            # mem[add] <- value
+            temp = i.split(' ')
+            add, value = int(temp[0],16),bin(int(temp[1][0:4],16))[2:]
+            print(type(value),value)
+            mem.set_to_memory(add,value)
+            # step_info update
+            self.txt_step_info.insert(INSERT, 'MEM[' + str(add) + '] = ' + value + '\n')
+
+        # set pc (6 by default)
+        pc.value = '110'
+        self.txt_step_info.insert(INSERT, 'PC has been set to 0110')
+        # mem_info refresh
+        self.refresh_mem_info()
+        self.refresh_reg_info()
+
+    # funtion for btn_ss: excute the instruction on the mem[PC]
+    def func_ss(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR):
+        print('button ss is pressed')
+        self.txt_step_info.delete(1.0, END)
+        self.txt_step_info.insert(INSERT, 'Single Step: PC = ' + pc.value + '\n\n')
+
+        # Fetch Instruction
+        self.txt_step_info.insert(INSERT, 'Fetch Instruction \n')
+        # MAR <- PC
+        mar.get_from_PC(pc)
+        self.txt_step_info.insert(INSERT, 'MAR <- PC :\t\t\tMAR = ' + mar.value + '\n')
+        # PC++
+        pc.add_10(1)
+        self.txt_step_info.insert(INSERT, 'PC++ :\t\t\tPC = ' + pc.value + '\n')
+        # MBR <- mem[MAR]
+        mbr.load_from_mem(mar,mem)
+        self.txt_step_info.insert(INSERT, 'MBR <- MEM[MAR] :\t\t\tMBR = ' + mbr.value + '\n')
+        # IR <- MBR
+        ir.get_from_MBR(mbr)
+        self.txt_step_info.insert(INSERT, 'IR <- MBR :\t\t\tIR = ' + ir.value + '\n\n')
+
+
+        # Decode
+        self.txt_step_info.insert(INSERT, 'Decode Instruction \n')
+        word = Instruction(ir.value)
+        self.txt_step_info.insert(INSERT, 'Instruction :\t\t\t' + word.print_out() + '\n\n')
+
+        # Locate
+        self.txt_step_info.insert(INSERT, 'Locate EA \n')
+        # IAR <- ADD
+        iar = Register(12, 'IAR')
+        iar.value = word.address
+        self.txt_step_info.insert(INSERT, 'IAR <- Add :\t\t\tIAR = ' + iar.value + '\n')
+        # IAR += X[IXR] if IXR = 1 or 2 or 3
+        ixr_id = int(word.ixr_index,2)
+        if ixr_id != 0:
+            ixr = self.xs[ixr_id-1]
+            iar.add_2(ixr.value)
+            self.txt_step_info.insert(INSERT, 'IAR <- ' + ixr.label + ' :\t\t\tIAR = ' + iar.value + '\n')
+        # IAR <- MEM[IAR] if I = 1
+        if int(word.indirect,2) == 1:
+            add = int(iar.value,2)
+            iar.value = mem.get_from_memory(add)            
+            self.txt_step_info.insert(INSERT, 'IAR <- MEM[' + str(add) + '] :\t\t\tIAR = ' + iar.value + '\n')
+        # MAR <- IAR
+        mar.value = iar.value
+        self.txt_step_info.insert(INSERT, 'MAR <- IAR :\t\t\tMAR = ' + mar.value + '\n\n')
+
+        # Excute and Deposit
+        self.txt_step_info.insert(INSERT, 'Excute and Deposit Result \n')
+        # LDR op=1
+        op = int(word.opcode,2)
+        if op == 1:
+            # MBR <- MEM[MAR]
+            mbr.load_from_mem(mar,mem)
+            self.txt_step_info.insert(INSERT, 'MBR <- MEM[MAR] :\t\t\tMBR = ' + mbr.value + '\n')
+            # IRR <- MBR
+            irr = Register(16,'IRR')
+            irr.value = mbr.value
+            self.txt_step_info.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
+            # R[GPR] <- IRR
+            gpr = self.gprs[int(word.gpr_index,2)]
+            gpr.value = irr.value
+            self.txt_step_info.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
+
+        self.refresh_reg_info()
+        self.refresh_mem_info()
+
+    # function for btn_run: excute the program
+    def func_run(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR):
+        pass

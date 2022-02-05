@@ -39,6 +39,9 @@ class Register:
         else:
             print(self.label + ' overflow error')
 
+    def reset(self):
+        self.value = '0' * self.size
+
 class PC(Register):
     """This is the class of Program Counter
     PC has 12 bits
