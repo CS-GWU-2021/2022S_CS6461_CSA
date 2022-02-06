@@ -330,9 +330,14 @@ class Window():
         self.txt_ipl_info.delete(1.0, END)
         self.txt_step_info.delete(1.0, END)
         file_dir = './ipl.txt'
-        with open(file_dir, 'r') as f:
-            lines = f.readlines()
-        f.close()
+        try:
+            with open(file_dir, 'r') as f:
+                lines = f.readlines()
+            f.close()
+        except FileNotFoundError:
+             self.txt_ipl_info.insert(INSERT, file_dir + ' does not exist')
+             return
+
         for i in lines:
             # ipl_info update
             self.txt_ipl_info.insert(INSERT, i)
