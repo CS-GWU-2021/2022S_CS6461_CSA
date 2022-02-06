@@ -356,7 +356,7 @@ class Window():
         self.refresh_reg_info()
 
     def func_ss(self, mem : Memory, pc : PC, mar : MAR, mbr : MBR, ir : IR, if_clean : bool):
-        """This function implenments single step"""
+        """This function implements single step"""
         print('button ss is pressed')
         if if_clean:
             self.txt_step_info.delete(1.0, END)
@@ -474,7 +474,7 @@ class Window():
             self.txt_step_info.insert(INSERT, 'MEM['+ str(int(mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(mar.value,2)) + '] = ' + mem.memory[int(mar.value,2)] + '\n')
             
         # PC++
-        pc.add_10(1)
+        pc.next()
         self.txt_step_info.insert(INSERT, '\nPC++ :\t\t\tPC = ' + pc.value + '\n')
         self.refresh_reg_info()
         self.refresh_mem_info()

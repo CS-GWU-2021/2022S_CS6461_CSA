@@ -1,6 +1,7 @@
 #-----------------------------------------------------------------
 # @Author :     Tenphun0503
 # This file contains all of the needed registers class
+# PC MAR MBR IR CC MFR GPR IXR
 #------------------------------------------------------------------
 from memory import *
 
@@ -58,6 +59,10 @@ class PC(Register):
     """
     def __init__(self, size=12, label='PC'):
         super().__init__(size=size, label=label)
+
+    def next(self):
+        """This function defines how pc find the next instruction"""
+        self.add_10(1)
     
 class MAR(Register):
     """This is the class of Memory Address Register
