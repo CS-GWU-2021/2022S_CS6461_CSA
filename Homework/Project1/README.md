@@ -47,8 +47,11 @@ The front panel has the following registers:
 Load/Store Instruction:  
 |OpCode_8|Instruction|Example|Encoded Instruction|Description|
 |--------|-----------|-------|-------------------|-----------|
-|01|LDR r, x, address|LDR 3,0,31|000001 11 00 0 11111|Load GPR3 with the contents of the memory 31|
-|02|STR r, x, address|STR 2,0,16|000002 10 00 0 10000|Store GPR2 with the contents of the memory 16|
+|01|LDR|LDR 3,0,31|000001 11 00 0 11111|Load GPR3 from memory 31|
+|02|STR|STR 2,0,16|000010 10 00 0 10000|Store GPR2 to memory 16|
+|03|LDA|LDA 2,0,16|000011 10 00 0 10000|Load GPR3 with address 16|
+|33|LDX|LDX 0,1,31|100001 00 01 0 11111|Load IXR1 from memory 31|
+|34|STX|STX 0,2,16|100010 00 10 0 10000|Store IXR2 to memory 16|
 
 User Interface Foresight:
 ![UI](https://github.com/CS-GWU-2021/2022S_CS6461_CSA/blob/main/Homework/Project1/user%20interface.png)
