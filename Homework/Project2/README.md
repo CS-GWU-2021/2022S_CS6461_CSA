@@ -53,12 +53,41 @@ OpCode format
 
 |OpCode|Instruction|Name|Example|Description|Comment|
 |------|-----------|----|-------|-----------|-------|
-|16|MLT|Multiply Register by Register|MLT rx ry|Rx, Rx+1=c(Rx)*(Ry)|Rx, Ry must be 0 or 2; Rx contains the higo oder bits, Rx+1 contains the low order bits; Set OVERFLOW if overflow
+|16|MLT|Multiply Register by Register|MLT rx ry|Rx, Rx+1=c(Rx)\*(Ry)|Rx, Ry must be 0 or 2; Rx contains the high oder bits, Rx+1 contains the low order bits; Set OVERFLOW if overflow
 |17|DVD|Devide Register by Register|DVD rx ry|Rx, Rx+1=c(Rx)/(Ry)|Rx, Ry must be 0 or 2; Rx contains the quotient; Rx+1 contains the ramainder; Set DIVZERO if c(Ry)=0|
 |18|TRR|Test the Equality Of Register and Register|TRR rx ry|cc(4)=1 if c(Rx)=c(Ry) else cc(r)=0|
 |19|AND|Logical And of Register and Register|AND rx ry|c(Rx)=c(Rx) AND c(Ry)|
 |20|ORR|Logical Or of Register and Register|ORR rx ry|c(Rx)=c(Rx) OR c(Ry)|
 |21|NOT|Logical Not of Register to Register|NOT rx ry|c(Rx)=NOT c(Rx)|
+### 6. Shift/Rotate Instructions
+OpCode format
+|OpCode|R|A/L|L/R|Ignored|Count|
+|------|-|---|---|-------|-----|
+|6 bits|2 bits|1 bit|1 bit|2 bits|4 bits|
+
+|OpCode|Instruction|Name|Example|Description|Comment|
+|------|-----------|----|-------|-----------|-------|
+|25|SRC|Shift Register by Count|SRC r count L/R A/L|c(R) is shifted left(L/R=1) or right(L/R=0) either logically(A/L=1) or arithmetically(A/L=0)|No shift occurs if Count=0|
+|26|RRC|Rotate Register by Count|RRC r count L/R A/L|c(R) is Rotated left(L/R=1) or right(L/R=0) either logically(A/L=1)|No rotate occurs if Count=0|
+### 7. I/O Instructions
+OpCode format
+|OpCode|R|Ignored|DevID|
+|------|-|-------|-----|
+|6 bits|2 bits|3 bits|5 bits|
+
+DevID 
+|DevID|Device|
+|-----|------|
+|0|Console Keyboard|
+|1|Console Printer|
+|2|Card Reader|
+|3-31|Console Register, switches, etc|
+
+|OpCode|Instruction|Name|Example|
+|------|-----------|----|-------|
+|49|IN|Input Character to Regisgter from Device|IN r devid|
+|50|OUT|Output Character to Device from Register|OUT r devid|
+
 ## 4. Notes
 cc: Condition code, which has four 1-bit elements:
 |element|symbol|
