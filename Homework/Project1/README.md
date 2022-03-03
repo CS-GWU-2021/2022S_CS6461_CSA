@@ -45,7 +45,7 @@ The front panel has the following registers:
 |IXR 1-3|16 bits|Index Register|
 
 Load/Store Instruction:  
-|OpCode_8|Instruction|Example|Encoded Instruction|Description|
+|OpCode|Instruction|Example|Encoded Instruction|Description|
 |--------|-----------|-------|-------------------|-----------|
 |01|LDR|LDR 3,0,31|000001 11 00 0 11111|Load GPR3 from memory 31|
 |02|STR|STR 2,0,16|000010 10 00 0 10000|Store GPR2 to memory 16|
