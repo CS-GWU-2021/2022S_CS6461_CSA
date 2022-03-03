@@ -9,14 +9,29 @@ from instruction import *
 from memory import *
 
 class Window():
-    def __init__(self, master, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem, ins):
+    def __init__(self, master, sys):
         self.master = master
-        self.registers = [gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr]
-        self.xs = [x1,x2,x3]
-        self.gprs = [gpr0, gpr1, gpr2, gpr3]
-        self.mem = mem
-        self.ins_object = ins
-      
+
+        self.mem = sys.mem
+        self.ins_object = sys.ins
+        self.pc = sys.pc
+        self.mar = sys.mar
+        self.mbr = sys.mbr
+        self.ir = sys.ir
+        self.mfr = sys.mfr
+        self.gpr0 = sys.gpr0
+        self.gpr1 = sys.gpr1
+        self.gpr2 = sys.gpr2
+        self.gpr3 = sys.gpr3
+        self.x1 = sys.x1
+        self.x2 = sys.x2
+        self.x3 = sys.x3
+        # for refreshing
+        self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3, self.pc, self.mar, self.mbr, self.ir, self.mfr]
+
+        self.xs = [sys.x1, sys.x2, sys.x3]
+        self.gprs = [sys.gpr0, sys.gpr1, sys.gpr2, sys.gpr3]
+
         # parameters to update the label widget
         self.txt_value_GPR0 = StringVar()
         self.txt_value_GPR1 = StringVar()
@@ -43,9 +58,9 @@ class Window():
         self.refresh_instruction_info()
 
         # set layout
-        self.set_window(gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem)
+        self.set_window()
 
-    def set_window(self, gpr0, gpr1, gpr2, gpr3, x1, x2, x3, pc, mar, mbr, ir, mfr, mem):
+    def set_window(self):
         """This functin sets the layout of the window"""
         # GUI setting para
         win_title = 'CSCI6461'
@@ -63,7 +78,7 @@ class Window():
         self.master.title(win_title)
         self.master.geometry(win_size)
         self.master.minsize(win_min_width,win_min_height)
-        self.master["bg"] = win_color  
+        self.master["bg"] = win_color
 
         # setting layout of main window
         self.master.grid_columnconfigure(0,weight=1, minsize=1200)
@@ -75,7 +90,7 @@ class Window():
         # Frame 1
         self.frame1 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin, pady=win_margin)
         self.frame1.grid(row=0, column=0, sticky=W+E, padx=win_margin, pady=win_margin)
-        
+
         # setting layout of Frame 1
         self.frame1.grid_columnconfigure(1, weight=1, minsize=50)
         self.frame1.grid_columnconfigure(4, weight=1, minsize=50)
@@ -83,18 +98,18 @@ class Window():
             self.frame1.grid_rowconfigure(i, weight=1, minsize=40)
 
         # labels of registers
-        label_GPR0 = Label(self.frame1, text=gpr0.label).grid(row=0,column=0)
-        label_GPR1 = Label(self.frame1, text=gpr1.label).grid(row=1,column=0)
-        label_GPR2 = Label(self.frame1, text=gpr2.label).grid(row=2,column=0)
-        label_GPR3 = Label(self.frame1, text=gpr3.label).grid(row=3,column=0)
-        label_IXR1 = Label(self.frame1, text=x1.label).grid(row=4,column=0)
-        label_IXR2 = Label(self.frame1, text=x2.label).grid(row=5,column=0)
-        label_IXR3 = Label(self.frame1, text=x3.label).grid(row=6,column=0)
-        label_PC = Label(self.frame1, text=pc.label).grid(row=0,column=3)
-        label_MAR = Label(self.frame1, text=mar.label).grid(row=1,column=3)
-        label_MBR = Label(self.frame1, text=mbr.label).grid(row=2,column=3)
-        label_IR = Label(self.frame1, text=ir.label).grid(row=3,column=3)
-        label_MFR = Label(self.frame1, text=mfr.label).grid(row=4,column=3)
+        label_GPR0 = Label(self.frame1, text=self.gpr0.label).grid(row=0,column=0)
+        label_GPR1 = Label(self.frame1, text=self.gpr1.label).grid(row=1,column=0)
+        label_GPR2 = Label(self.frame1, text=self.gpr2.label).grid(row=2,column=0)
+        label_GPR3 = Label(self.frame1, text=self.gpr3.label).grid(row=3,column=0)
+        label_IXR1 = Label(self.frame1, text=self.x1.label).grid(row=4,column=0)
+        label_IXR2 = Label(self.frame1, text=self.x2.label).grid(row=5,column=0)
+        label_IXR3 = Label(self.frame1, text=self.x3.label).grid(row=6,column=0)
+        label_PC = Label(self.frame1, text=self.pc.label).grid(row=0,column=3)
+        label_MAR = Label(self.frame1, text=self.mar.label).grid(row=1,column=3)
+        label_MBR = Label(self.frame1, text=self.mbr.label).grid(row=2,column=3)
+        label_IR = Label(self.frame1, text=self.ir.label).grid(row=3,column=3)
+        label_MFR = Label(self.frame1, text=self.mfr.label).grid(row=4,column=3)
 
         # text box of registers
         txt_GPR0 = Label(self.frame1, textvariable = self.txt_value_GPR0, relief=text_box_style).grid(row=0,column=1,sticky=W+E)
@@ -111,16 +126,16 @@ class Window():
         txt_MFR = Label(self.frame1,textvariable = self.txt_value_MFR, relief=text_box_style).grid(row=4,column=4,sticky=W+E)
 
         # LD button of registers
-        btn_GPR0 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr0)).grid(row=0,column=2)
-        btn_GPR1 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr1)).grid(row=1,column=2)
-        btn_GPR2 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr2)).grid(row=2,column=2)
-        btn_GPR3 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(gpr3)).grid(row=3,column=2)
-        btn_IXR1 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(x1)).grid(row=4,column=2)
-        btn_IXR2 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(x2)).grid(row=5,column=2)
-        btn_IXR3 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(x3)).grid(row=6,column=2)
-        btn_PC = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(pc)).grid(row=0,column=5)
-        btn_MAR = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(mar)).grid(row=1,column=5)
-        btn_MBR = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(mbr)).grid(row=2,column=5)
+        btn_GPR0 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.gpr0)).grid(row=0,column=2)
+        btn_GPR1 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.gpr1)).grid(row=1,column=2)
+        btn_GPR2 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.gpr2)).grid(row=2,column=2)
+        btn_GPR3 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.gpr3)).grid(row=3,column=2)
+        btn_IXR1 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.x1)).grid(row=4,column=2)
+        btn_IXR2 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.x2)).grid(row=5,column=2)
+        btn_IXR3 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.x3)).grid(row=6,column=2)
+        btn_PC = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.pc)).grid(row=0,column=5)
+        btn_MAR = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.mar)).grid(row=1,column=5)
+        btn_MBR = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(self.mbr)).grid(row=2,column=5)
 
 
         # Frame2
@@ -147,7 +162,7 @@ class Window():
         txt_I = Label(self.frame2, textvariable=self.txt_value_Indirect, relief=text_box_style).grid(row=1,column=10,sticky=W+E)
         txt_Address = Label(self.frame2, textvariable=self.txt_value_Address, relief=text_box_style).grid(row=1,column=11,columnspan=5,sticky=W+E)
 
-        # button of Instruction: to set corresponding value to 1 or 0       
+        # button of Instruction: to set corresponding value to 1 or 0
         btn_Ope0 = Button(self.frame2, text='0',width=instruction_btn_width, command = lambda: self.func_instruction(0)).grid(row=2,column=0)
         btn_Ope1 = Button(self.frame2, text='1',width=instruction_btn_width, command = lambda: self.func_instruction(1)).grid(row=2,column=1)
         btn_Ope2 = Button(self.frame2, text='2',width=instruction_btn_width, command = lambda: self.func_instruction(2)).grid(row=2,column=2)
@@ -170,13 +185,13 @@ class Window():
         self.frame3.grid(row=2,column=0,sticky=E,padx=win_margin)
 
         # button of interaction
-        btn_store = Button(self.frame3, text='Store',width=interact_btn_width, command = lambda: self.func_store(mar, mbr, mem)).grid(row=0,column=0,padx=10,pady=5,sticky=W+E)
-        btn_st_plus = Button(self.frame3, text='St+',width=interact_btn_width, command = lambda: self.func_st_plus(mar, mbr, mem)).grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
-        btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = lambda: self.func_load(mar, mbr, mem)).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
+        btn_store = Button(self.frame3, text='Store',width=interact_btn_width, command = lambda: self.func_store(self.mar, self.mbr, self.mem)).grid(row=0,column=0,padx=10,pady=5,sticky=W+E)
+        btn_st_plus = Button(self.frame3, text='St+',width=interact_btn_width, command = lambda: self.func_st_plus(self.mar, self.mbr, self.mem)).grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
+        btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = lambda: self.func_load(self.mar, self.mbr, self.mem)).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
         btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,padx=10,pady=5,sticky=W+E)
-        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(mem, pc, mar, mbr, ir, True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
-        btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = lambda: self.func_run(mem, pc, mar, mbr, ir)).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
-        btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = lambda: self.func_ipl(pc, mem)).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
+        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(self.mem, self.pc, self.mar, self.mbr, self.ir, True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
+        btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = lambda: self.func_run(self.mem, self.pc, self.mar, self.mbr, self.ir)).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
+        btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = lambda: self.func_ipl(self.pc, self.mem)).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
 
         # Frame4
         self.frame4 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin,pady=win_margin)
@@ -184,12 +199,12 @@ class Window():
 
         # setting layout of Frame 4
         self.frame4.rowconfigure(0,weight=0,minsize=20)
-        self.frame4.rowconfigure(1,weight=1,minsize=30)       
+        self.frame4.rowconfigure(1,weight=1,minsize=30)
         self.frame4.columnconfigure(0,weight=1, minsize=50)
         self.frame4.columnconfigure(1,weight=1, minsize=100)
         self.frame4.columnconfigure(2,weight=1, minsize=50)
 
-        # label of info 
+        # label of info
         label_step_info = Label(self.frame4, text='Step_Info')
         label_step_info.grid(row=0,column=0,sticky=W+S+N)
         label_mem_info = Label(self.frame4, text='Mem_Info')
@@ -203,7 +218,7 @@ class Window():
         self.txt_step_info.insert(INSERT, 'System Is Ready')
 
         self.txt_mem_info = ScrolledText(self.frame4, relief=text_box_style)
-        self.txt_mem_info.grid(row=1,column=1, sticky=W+E+S+N)   
+        self.txt_mem_info.grid(row=1,column=1, sticky=W+E+S+N)
         self.refresh_mem_info()
 
         self.txt_ipl_info = ScrolledText(self.frame4, relief=text_box_style)
@@ -228,7 +243,7 @@ class Window():
         """This function resets all of the system"""
         self.mem.reset_memory()
         for i in self.registers:
-            i.reset() 
+            i.reset()
         self.ins_object.reset()
 
         self.refresh_reg_info()
@@ -240,7 +255,7 @@ class Window():
         self.txt_ipl_info.insert(INSERT, 'Please press IPL to pre-load the program')
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT, 'System Is Ready')
-        
+
     def refresh_instruction_info(self):
         """This function refreshes the text of instruction"""
         space = '\t   '
@@ -287,7 +302,7 @@ class Window():
         self.refresh_reg_info()
         self.refresh_mem_info()
         self.txt_step_info.insert(INSERT, reg.label + ' <- ' + str(int(reg.value)))
-        
+
     def func_load(self, mar : MAR, mbr : MBR, mem : Memory):
         """This function loads the value of MEM[MAR] into MBR"""
         print('button Load is pressed')
@@ -404,7 +419,7 @@ class Window():
         # IAR <- MEM[IAR] if I = 1
         if int(word.indirect,2) == 1:
             add = int(iar.value,2)
-            iar.value = mem.get_from_memory(add)            
+            iar.value = mem.get_from_memory(add)
             self.txt_step_info.insert(INSERT, 'IAR <- MEM[' + str(add) + '] :\t\t\tIAR = ' + iar.value + '\n')
         # MAR <- IAR
         mar.value = iar.value
@@ -412,7 +427,7 @@ class Window():
 
         # Excute and Deposit
         self.txt_step_info.insert(INSERT, 'Excute and Deposit Result \n')
-        
+
 
         irr = Register(16,'IRR')
         # LDR
@@ -420,7 +435,7 @@ class Window():
             # MBR <- MEM[MAR]
             mbr.load_from_mem(mar,mem)
             self.txt_step_info.insert(INSERT, 'MBR <- MEM['+ str(int(mar.value,2)) + '] :\t\t\tMBR = ' + mbr.value + '\n')
-            # IRR <- MBR           
+            # IRR <- MBR
             irr.value = mbr.value
             self.txt_step_info.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
             # R[GPR] <- IRR
@@ -453,13 +468,13 @@ class Window():
             # MBR <- MEM[MAR]
             mbr.load_from_mem(mar,mem)
             self.txt_step_info.insert(INSERT, 'MBR <- MEM['+ str(int(mar.value,2)) + '] :\t\t\tMBR = ' + mbr.value + '\n')
-            # IRR <- MBR           
+            # IRR <- MBR
             irr.value = mbr.value
             self.txt_step_info.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
             # X[IXR] <- IRR
             ixr = self.xs[ixr_id-1]
             ixr.value = irr.value
-            self.txt_step_info.insert(INSERT, ixr.label + ' <- IRR :\t\t\t' + ixr.label + ' = ' + ixr.value + '\n')          
+            self.txt_step_info.insert(INSERT, ixr.label + ' <- IRR :\t\t\t' + ixr.label + ' = ' + ixr.value + '\n')
         # STX
         elif op == 34:
             # IRR <- X[IXR]
@@ -472,7 +487,7 @@ class Window():
             # MEM[MAR] <- MBR
             mbr.store_to_mem(mar, mem)
             self.txt_step_info.insert(INSERT, 'MEM['+ str(int(mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(mar.value,2)) + '] = ' + mem.memory[int(mar.value,2)] + '\n')
-            
+
         # PC++
         pc.next()
         self.txt_step_info.insert(INSERT, '\nPC++ :\t\t\tPC = ' + pc.value + '\n')
