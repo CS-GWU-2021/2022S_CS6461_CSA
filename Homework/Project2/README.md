@@ -89,7 +89,7 @@ DevID
 |50|OUT|Output Character to Device from Register|OUT r devid|
 
 ## 4. Notes
-cc: Condition code, which has four 1-bit elements:
+- cc: Condition code, which has four 1-bit elements:
 |element|symbol|
 |-------|------|
 |overflow|cc(0)|
@@ -97,5 +97,5 @@ cc: Condition code, which has four 1-bit elements:
 |division by zero|cc(2)|
 |equal-or-not|cc(3)|
 
-For immediate instructions, the Address portion is considered to be the Immediate Value.
+- For immediate instructions, the Address portion is considered to be the Immediate Value.
 (The maximum absolute value of the Immediate Value is 31. (5 bits without sign))
