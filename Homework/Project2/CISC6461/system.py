@@ -2,6 +2,7 @@
 # @Author :     Tenphun0503
 # This file implements the main logic of the system
 #-----------------------------------------------------------------
+import time
 from GUI import *
 from CPU.registers import *
 from memory import *
@@ -246,4 +247,4 @@ class System:
         self.__execute_deposit(txt, word)
         # PC++
         self.pc.next()
-        txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n')
+        txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n\n')

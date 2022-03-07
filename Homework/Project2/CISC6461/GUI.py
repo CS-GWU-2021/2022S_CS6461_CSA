@@ -183,10 +183,16 @@ class Window():
         btn_store = Button(self.frame3, text='Store',width=interact_btn_width, command = self.func_store).grid(row=0,column=0,padx=10,pady=5,sticky=W+E)
         btn_st_plus = Button(self.frame3, text='St+',width=interact_btn_width, command = self.func_st_plus).grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
         btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = self.func_load).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
-        btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,padx=10,pady=5,sticky=W+E)
+        btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,columnspan=2, padx=10,pady=5,sticky=W+E)
         btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
         btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = self.func_run).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
         btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = self.func_ipl).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
+
+        # state indicator 
+        #label_halt = Label(self.frame3, text='Halt/Run').grid(row=1,column=3,padx=10,pady=5,sticky=E)
+        #self.canvas = Canvas(self.frame3,width=40,height=40)
+        #self.canvas.grid(row=1,column=4,sticky=W)
+        #self.canvas.create_oval(5,15,20,30,fill="red")
 
         # Frame4
         self.frame4 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin,pady=win_margin)
@@ -349,28 +355,34 @@ class Window():
         self.refresh_mem_info()
         self.refresh_reg_info()
 
-    def func_ss(self, if_clean_info : bool):
+    def func_ss(self, if_ss : bool):
         """This function implements single step"""
         print('button ss is pressed')
         self.txt_step_info.configure(state='normal')
-        if if_clean_info:
+        #self.canvas.create_oval(5,15,20,30,fill="green")
+        if if_ss:
             self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, '-------------------------------------------------\n')
         self.txt_step_info.insert(INSERT, 'Step: PC = ' + self.pc.value + '\n\n')
         state = self.sys.single_step(self.txt_step_info)
+        if if_ss:
+            self.txt_step_info.insert(INSERT, 'System Halted!\n\n')
         self.txt_step_info.configure(state='disabled')
+        #self.canvas.create_oval(5,15,20,30,fill="red")
         self.refresh_reg_info()
         self.refresh_mem_info()
-        # Halt
+        # Halt indicator for func_run
         if state == 'HALT':
-            return False
-        return True
+            return True
+        return False
 
     def func_run(self):
         """This function implements RUN"""
-        if_run = True
+        if_halt = False
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.delete(1.0, END)
-        while if_run:
-            if_run = self.func_ss(False)
+        while not if_halt:
+            if_halt = self.func_ss(False)
+        self.txt_step_info.configure(state='normal')
+        self.txt_step_info.insert(INSERT, 'System Halted!\n\n')
         self.txt_step_info.configure(state='disabled')
