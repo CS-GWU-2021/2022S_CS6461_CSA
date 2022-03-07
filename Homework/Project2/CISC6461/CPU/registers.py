@@ -2,7 +2,7 @@
 # @Author :     Tenphun0503
 # This file contains all of the needed registers class
 # PC MAR MBR IR CC MFR GPR IXR
-#------------------------------------------------------------------
+#-----------------------------------------------------------------
 from memory import *
 
 class Register:
@@ -63,7 +63,7 @@ class PC(Register):
     def next(self):
         """This function defines how pc find the next instruction"""
         self.add_10(1)
-    
+
 class MAR(Register):
     """This is the class of Memory Address Register
     MAR has 12 bits
