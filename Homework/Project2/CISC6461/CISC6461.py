@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     # initialize a tkinter window
     window = Tk()
-    app = Window(window, sys)
+    app = MainWindow(window, sys)
 
     # show window
     window.mainloop()

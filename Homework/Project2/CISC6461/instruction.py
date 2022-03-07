@@ -3,7 +3,7 @@
 # this file contains the class of instruction
 #------------------------------------------------------
 
-class Instruction:    
+class Instruction:
     """This is the class for Instruction:
     Parameters:
     --------------
@@ -15,6 +15,14 @@ class Instruction:
         if len(value) < 16:
             value = value.zfill(16)
         self.value = value
+
+        self.dict_opcode = {1 : 'LDR', 2 : 'STR', 3 : 'LDA',
+                            8 : 'JZ', 9 : 'JNE', 10 : 'JCC',
+                            11 : 'JMA', 12 : 'JSR', 13 : 'RFS',
+                            14 : 'SOB', 15 : 'JGE', 
+                            33 : 'LDX', 34 : 'STX'}
+        self.dict_opcode.setdefault(0, 'HLT')
+
         self.update()
 
     def update(self):
@@ -33,11 +41,34 @@ class Instruction:
     def print_out(self):
         """This function translates the instruction and prints it out at the Step_info
         """
-        dict_opcode = {1 : 'LDR', 2 : 'STR', 3 : 'LDA', 33 : 'LDX', 34 : 'STX'}
-        dict_opcode.setdefault(0, 'HLT')
-        word = dict_opcode[int(self.opcode,2)] + ' '
+        word = self.dict_opcode[int(self.opcode,2)] + ' '
         word += str(int(self.gpr_index,2)) + ' '
         word += str(int(self.ixr_index,2)) + ' '
         word += str(int(self.indirect,2)) + ' '
         word += str(int(self.address,2))
         return word
+
+    def decode_test(self, ins_test):
+        dict = {str:num for num,str in self.dict_opcode.items()}
+        if len(ins_test.split(' ')) != 5:
+            print('Wrong Number of args')
+            return 'NUMERROR'
+        self.opcode, self.gpr_index, self.ixr_index, self.indirect, self.address = ins_test.split(' ')
+        if self.opcode not in dict.keys():
+            print("Wrong Operation")
+            return 'OPERROR'
+        if int(self.gpr_index) not in [0,1,2,3]:
+            print("Wrong Gpr")
+            return 'GPRERROR'
+        if int(self.ixr_index) not in [0,1,2,3]:
+            print("Wrong IXR")
+            return 'IXRERROR'
+        if int(self.indirect) not in [0,1]:
+            print("Wrong Indirect")
+            return 'IERROR'
+        self.opcode = bin(dict[self.opcode])[2:]
+        self.gpr_index = bin(int(self.gpr_index))[2:]
+        self.ixr_index = bin(int(self.ixr_index))[2:]
+        self.indirect = bin(int(self.indirect))[2:]
+        self.address = bin(int(self.address))[2:]
+        print(self.print_out())

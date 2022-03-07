@@ -204,6 +204,15 @@ class System:
             # R[GPR] <- IRR
             gpr.value = irr.value
             txt.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
+        # JZ
+        elif op == 8:
+            txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\n')
+            if int(gpr.value,2) == 0:
+                self.pc.value = self.mar.value
+                txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n')
+            else:
+                self.pc.next()
+                txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
         # LDX
         elif op == 33:
             # MBR <- MEM[MAR]
@@ -248,3 +257,28 @@ class System:
         # PC++
         self.pc.next()
         txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n\n')
+
+    def test_ins(self, ins, txt):
+        """This function implements testing of input instrucitons
+        It's called in GUI.func_test
+        """
+        i = Instruction()
+        msg = i.decode_test(ins)
+        if msg == 'NUMERROR':
+            txt.insert(INSERT, 'Args Number Error\nPlease input again (e.g. LDR 1 0 0 31)\n\n')
+            return
+        elif msg =='OPERROR':
+            txt.insert(INSERT, 'Operation ERROR\nPlease input again\n\n')
+            return
+        elif msg =='GPRERROR':
+            txt.insert(INSERT, 'GPR ERROR\nGPR should be 0, 1, 2 or 3\n\n')
+            return
+        elif msg =='IXRERROR':
+            txt.insert(INSERT, 'IXR ERROR\nIXR should be 0, 1, 2, or 3\n\n')
+            return
+        elif msg =='IERROR':
+            txt.insert(INSERT, 'Indirect ERROR\nIndirect should be 1 or 0\n\n')
+            return
+        txt.insert(INSERT, 'Valid Instruction detected\n\n')
+        self.__locate(txt, i)
+        self.__execute_deposit(txt, i)

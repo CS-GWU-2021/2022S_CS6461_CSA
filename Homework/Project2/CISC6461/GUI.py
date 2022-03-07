@@ -4,8 +4,9 @@
 #------------------------------------------------------
 from tkinter import *
 from tkinter.scrolledtext import ScrolledText
+from tkinter.messagebox import *
 
-class Window():
+class MainWindow:
     def __init__(self, master, sys):
         self.master = master
         self.sys = sys
@@ -52,10 +53,13 @@ class Window():
         self.txt_value_Address = StringVar()
         self.refresh_instruction_info()
 
+        # Test Instruction Input
+        self.test_ins_input = StringVar()
+        self.test_ins_input.set('')
         # set layout
-        self.set_window()
+        self.__set_window()
 
-    def set_window(self):
+    def __set_window(self):
         """This functin sets the layout of the window"""
         # GUI setting para
         win_title = 'CSCI6461'
@@ -187,8 +191,9 @@ class Window():
         btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
         btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = self.func_run).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
         btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = self.func_ipl).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
-
-        # state indicator 
+        entry_test = Entry(self.frame3, textvariable=self.test_ins_input).grid(row=2,column=1,columnspan=2,sticky=W+E)
+        btn_test = Button(self.frame3, text='Test',width=interact_btn_width, command = self.func_test).grid(row=2,column=3,padx=10,pady=5,sticky=W+E)
+        # state indicator
         #label_halt = Label(self.frame3, text='Halt/Run').grid(row=1,column=3,padx=10,pady=5,sticky=E)
         #self.canvas = Canvas(self.frame3,width=40,height=40)
         #self.canvas.grid(row=1,column=4,sticky=W)
@@ -386,3 +391,17 @@ class Window():
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.insert(INSERT, 'System Halted!\n\n')
         self.txt_step_info.configure(state='disabled')
+
+    def func_test(self):
+        self.txt_step_info.configure(state='normal')
+        self.txt_step_info.delete(1.0, END)
+        ins = self.test_ins_input.get()
+        ins=ins.strip(' ')
+        ins=ins.replace('\n','')
+        ins=ins.replace(',',' ')
+        self.txt_step_info.insert(INSERT, 'Input: ' + ins + '\n')
+        self.sys.test_ins(ins, self.txt_step_info)
+        self.refresh_reg_info()
+        self.refresh_mem_info()
+        self.txt_step_info.configure(state='disabled')
+        self.test_ins_input.set('')
