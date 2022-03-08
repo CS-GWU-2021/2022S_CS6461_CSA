@@ -45,6 +45,7 @@ class Register:
         adder: the decimal number that going to be added to
         """
         temp = bin(int(self.value,2) + adder)[2:]
+        print(temp)
         if self.check_overflow(temp) != True:
             self.value = temp
         else:

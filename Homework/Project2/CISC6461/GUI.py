@@ -18,6 +18,7 @@ class MainWindow:
         self.mbr = sys.mbr
         self.ir = sys.ir
         self.mfr = sys.mfr
+        self.cc = sys.cc
         self.gpr0 = sys.gpr0
         self.gpr1 = sys.gpr1
         self.gpr2 = sys.gpr2
@@ -25,9 +26,10 @@ class MainWindow:
         self.x1 = sys.x1
         self.x2 = sys.x2
         self.x3 = sys.x3
-        # for refreshing
-        self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3, self.pc, self.mar, self.mbr, self.ir, self.mfr]
 
+        # for refreshing
+        self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3,
+                            self.pc, self.mar, self.mbr, self.ir, self.mfr, self.cc]
         # parameters to update the label widget
         self.txt_value_GPR0 = StringVar()
         self.txt_value_GPR1 = StringVar()
@@ -41,9 +43,11 @@ class MainWindow:
         self.txt_value_MBR = StringVar()
         self.txt_value_IR = StringVar()
         self.txt_value_MFR = StringVar()
+        self.txt_value_CC = StringVar()
         self.txt_value_registers = [self.txt_value_GPR0,self.txt_value_GPR1,self.txt_value_GPR2,self.txt_value_GPR3,
-                                    self.txt_value_IXR1,self.txt_value_IXR2,self.txt_value_IXR3,
-                                    self.txt_value_PC,self.txt_value_MAR,self.txt_value_MBR,self.txt_value_IR,self.txt_value_MFR]
+                                    self.txt_value_IXR1,self.txt_value_IXR2,self.txt_value_IXR3,self.txt_value_PC,
+                                    self.txt_value_MAR,self.txt_value_MBR,self.txt_value_IR,self.txt_value_MFR,
+                                    self.txt_value_CC]
         self.refresh_reg_info()
 
         self.txt_value_Opcode = StringVar()
@@ -109,6 +113,7 @@ class MainWindow:
         label_MBR = Label(self.frame1, text=self.mbr.label).grid(row=2,column=3)
         label_IR = Label(self.frame1, text=self.ir.label).grid(row=3,column=3)
         label_MFR = Label(self.frame1, text=self.mfr.label).grid(row=4,column=3)
+        label_CC = Label(self.frame1, text=self.cc.label).grid(row=5,column=3)
 
         # text box of registers
         txt_GPR0 = Label(self.frame1, textvariable = self.txt_value_GPR0, relief=text_box_style).grid(row=0,column=1,sticky=W+E)
@@ -123,6 +128,7 @@ class MainWindow:
         txt_MBR = Label(self.frame1, textvariable = self.txt_value_MBR, relief=text_box_style).grid(row=2,column=4,sticky=W+E)
         txt_IR = Label(self.frame1, textvariable = self.txt_value_IR, relief=text_box_style).grid(row=3,column=4,sticky=W+E)
         txt_MFR = Label(self.frame1,textvariable = self.txt_value_MFR, relief=text_box_style).grid(row=4,column=4,sticky=W+E)
+        txt_CC = Label(self.frame1,textvariable = self.txt_value_CC, relief=text_box_style).grid(row=5,column=4,sticky=W+E)
 
         # LD button of registers
         btn_GPR0 = Button(self.frame1, text='LD', command = lambda: self.func_reg_load(0)).grid(row=0,column=2)
@@ -348,6 +354,7 @@ class MainWindow:
 
     def func_ipl(self):
         """This function reset the system and pre-load the ipl.txt"""
+        print('button ipl is pressed')
         self.reset()
         self.txt_ipl_info.configure(state='normal')
         self.txt_step_info.configure(state='normal')
@@ -362,10 +369,10 @@ class MainWindow:
 
     def func_ss(self, if_ss : bool):
         """This function implements single step"""
-        print('button ss is pressed')
         self.txt_step_info.configure(state='normal')
         #self.canvas.create_oval(5,15,20,30,fill="green")
         if if_ss:
+            print('button ss is pressed')
             self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, '-------------------------------------------------\n')
         self.txt_step_info.insert(INSERT, 'Step: PC = ' + self.pc.value + '\n\n')
@@ -383,6 +390,7 @@ class MainWindow:
 
     def func_run(self):
         """This function implements RUN"""
+        print('button run is pressed')
         if_halt = False
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.delete(1.0, END)
@@ -393,6 +401,8 @@ class MainWindow:
         self.txt_step_info.configure(state='disabled')
 
     def func_test(self):
+        """This function implements instruciton testing"""
+        print('button test is pressed')
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.delete(1.0, END)
         ins = self.test_ins_input.get()

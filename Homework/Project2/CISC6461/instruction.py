@@ -17,9 +17,10 @@ class Instruction:
         self.value = value
 
         self.dict_opcode = {1 : 'LDR', 2 : 'STR', 3 : 'LDA',
+                            4 : 'AMR',
                             8 : 'JZ', 9 : 'JNE', 10 : 'JCC',
                             11 : 'JMA', 12 : 'JSR', 13 : 'RFS',
-                            14 : 'SOB', 15 : 'JGE', 
+                            14 : 'SOB', 15 : 'JGE',
                             33 : 'LDX', 34 : 'STX'}
         self.dict_opcode.setdefault(0, 'HLT')
 
@@ -71,4 +72,3 @@ class Instruction:
         self.ixr_index = bin(int(self.ixr_index))[2:]
         self.indirect = bin(int(self.indirect))[2:]
         self.address = bin(int(self.address))[2:]
-        print(self.print_out())

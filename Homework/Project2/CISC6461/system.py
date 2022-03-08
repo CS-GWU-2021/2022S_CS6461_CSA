@@ -20,6 +20,7 @@ class System:
         self.mbr = MBR()
         self.ir = IR()
         self.mfr = MFR()
+        self.cc = CC()
         self.gpr0 = GPR(label='GPR0')
         self.gpr1 = GPR(label='GPR1')
         self.gpr2 = GPR(label='GPR2')
@@ -29,7 +30,8 @@ class System:
         self.x3 = IXR(label='IXR3')
 
         # for refreshing
-        self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3, self.pc, self.mar, self.mbr, self.ir, self.mfr]
+        self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3,
+                            self.pc, self.mar, self.mbr, self.ir, self.mfr, self.cc]
         self.gprs = [self.gpr0, self.gpr1, self.gpr2, self.gpr3]
         self.xs = [self.x1, self.x2, self.x3]
 
@@ -171,6 +173,10 @@ class System:
         gpr = self.gprs[int(word.gpr_index, 2)]
         ixr = self.xs[int(word.ixr_index,2)-1]
         irr = Register(16,'IRR')
+        ea = self.mar.value
+
+        c_r = int(gpr.value,2)
+        c_ea = int(self.mem.get_from_memory(int(ea,2)),2)
         # LDR
         if op == 1:
             # MBR <- MEM[MAR]
@@ -204,20 +210,124 @@ class System:
             # R[GPR] <- IRR
             gpr.value = irr.value
             txt.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
-        # JZ
+
+
+        # AMR: R=c(R)+c(EA)
+        elif op == 4:
+            txt.insert(INSERT, gpr.label + ' = ' + str(int(gpr.value)) + '\n')
+            txt.insert(INSERT, 'MEM['+ str(int(ea,2)) + '] = '  + str(int(self.mem.memory[int(ea,2)])) + '\n')
+            gpr.value = bin(c_r + c_ea)[2:]
+            txt.insert(INSERT, gpr.label + ' = ' + gpr.label + ' + MEM['+ str(int(ea,2)) + ']: \t\t\t' + gpr.label +' = ' + gpr.value + '\n')
+
+        # SMR: R=c(R)-c(EA)
+        elif op == 5:
+            pass
+        # AIR: R=c(R)+Immed
+        elif op == 6:
+            pass
+        # SIR: R=c(R)-Immed
+        elif op == 7:
+            pass
+        # JZ: PC=EA if c(R)=0 else PC++
         elif op == 8:
-            txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\n')
+            txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
             if int(gpr.value,2) == 0:
-                self.pc.value = self.mar.value
+                txt.insert(INSERT, gpr.label + ' == 0\n')
+                self.pc.value = ea
+                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+            else:
+                txt.insert(INSERT, gpr.label + ' != 0\n')
+                self.pc.next()
+                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n')
+        # JNE: PC=EA if c(R)!=0 else PC++
+        elif op == 9:
+            txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
+            if int(gpr.value,2) != 0:
+                txt.insert(INSERT, gpr.label + ' != 0\n')
+                self.pc.value = ea
+                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+            else:
+                txt.insert(INSERT, gpr.label + ' == 0\n')
+                self.pc.next()
+                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n')
+        # JCC: PC=EA if CC bit=1 else PC++  CC判定有待修改
+        elif op == 10:
+            self.cc.value = word.gpr_index
+            txt.insert(INSERT, 'CC = ' + self.cc.value + '\t\t\t')
+            if int(self.cc.value) == 1:
+                txt.insert(INSERT, 'CC == 1\n')
+                self.pc.value = ea
+                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+            else:
+                txt.insert(INSERT, 'CC != 1\n')
+                self.pc.next()
+                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n')
+        # JMA:  PC=EA
+        elif op == 11:
+            self.pc.value = ea
+            txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+        # JSR: R3=PC+1; PC=EA
+        elif op == 12:
+            pass
+        # RFS: R0=Immed; PC=c(R3)
+        elif op == 13:
+            immed = word.address
+            self.gpr0.value = immed
+            txt.insert(INSERT, 'GPR0 <- Immed :\t\t\tGPR0 = ' + self.gpr0.value + '\n')
+            self.pc.value = str(int(self.gpr3.value))
+            txt.insert(INSERT, 'PC <- GPR3 :\t\t\tPC = ' + self.pc.value + '\n')
+        # SOB: R=c(R)-1; PC=EA if C(R)>0 else PC++ 小于0会有错
+        elif op == 14:
+            gpr.add_10(-1)
+            txt.insert(INSERT, gpr.label + ' -- :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
+            if int(gpr.value,2) > 0:
+                txt.insert(INSERT, gpr.label + ' > 0\n')
+                self.pc.value = ea
                 txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n')
             else:
+                txt.insert(INSERT, gpr.label + ' <= 0\n')
                 self.pc.next()
                 txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
+        # JGE: PC=EA if c(R)>=0 else PC++ 这玩意儿能小于0？
+        elif op == 15:
+            txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
+            if int(gpr.value,2) >= 0:
+                txt.insert(INSERT, gpr.label + ' >= 0\n')
+                self.pc.value = ea
+                txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n')
+            else:
+                txt.insert(INSERT, gpr.label + ' < 0\n')
+                self.pc.next()
+                txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
+        # MLT: Rx, Rx+1=c(Rx)*(Ry)
+        elif op == 16:
+            pass
+        # DVD: Rx, Rx+1=c(Rx)/(Ry)
+        elif op == 17:
+            pass
+        # TRR: cc(4)=1 if c(Rx)=c(Ry) else cc(r)=0
+        elif op == 18:
+            pass
+        # AND: c(Rx)=c(Rx) AND c(Ry)
+        elif op == 19:
+            pass
+        # ORR: c(Rx)=c(Rx) OR c(Ry)
+        elif op == 20:
+            pass
+        # NOT: c(Rx)=NOT c(Rx)
+        elif op == 21:
+            pass
+        # SRC: c(R) is shifted left(L/R=1) or right(L/R=0) either logically(A/L=1) or arithmetically(A/L=0)
+        elif op == 25:
+            pass
+        # RRC: c(R) is Rotated left(L/R=1) or right(L/R=0) either logically(A/L=1)
+        elif op == 26:
+            pass
         # LDX
         elif op == 33:
             # MBR <- MEM[MAR]
             self.mbr.load_from_mem(self.mar,self.mem)
-            txt.insert(INSERT, 'MBR <- MEM['+ str(int(self.mar.value,2)) + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
+            txt.insert(INSERT, 'MBR <- MEM[' + str(int(self.mar.value,2)) + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
             # IRR <- MBR
             irr.value = self.mbr.value
             txt.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
@@ -235,6 +345,12 @@ class System:
             # MEM[MAR] <- MBR
             self.mbr.store_to_mem(self.mar, self.mem)
             txt.insert(INSERT, 'MEM['+ str(int(self.mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(self.mar.value,2)) + '] = ' + self.mem.memory[int(self.mar.value,2)] + '\n')
+        # IN
+        elif op == 49:
+            pass
+        # OUT
+        elif op == 50:
+            pass
 
     def single_step(self, txt):
         """This function implements the single step
@@ -279,6 +395,9 @@ class System:
         elif msg =='IERROR':
             txt.insert(INSERT, 'Indirect ERROR\nIndirect should be 1 or 0\n\n')
             return
-        txt.insert(INSERT, 'Valid Instruction detected\n\n')
-        self.__locate(txt, i)
+        txt.insert(INSERT, 'Valid Instruction detected\n')
+        txt.insert(INSERT, 'Decoded\n\n')
+        # for some operation x, i are ignored, which means no EA needed
+        if int(i.opcode,2) not in [6, 7, 13]:
+            self.__locate(txt, i)
         self.__execute_deposit(txt, i)
