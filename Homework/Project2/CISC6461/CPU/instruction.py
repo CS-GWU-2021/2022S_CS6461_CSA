@@ -17,7 +17,7 @@ class Instruction:
         self.value = value
 
         self.dict_opcode = {1 : 'LDR', 2 : 'STR', 3 : 'LDA',
-                            4 : 'AMR',
+                            4 : 'AMR', 5 : 'SMR', 6 : 'AIR', 7 : 'SIR',
                             8 : 'JZ', 9 : 'JNE', 10 : 'JCC',
                             11 : 'JMA', 12 : 'JSR', 13 : 'RFS',
                             14 : 'SOB', 15 : 'JGE',

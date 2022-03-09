@@ -375,7 +375,7 @@ class MainWindow:
             print('button ss is pressed')
             self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, '-------------------------------------------------\n')
-        self.txt_step_info.insert(INSERT, 'Step: PC = ' + self.pc.value + '\n\n')
+        self.txt_step_info.insert(INSERT, 'Step: PC = ' + self.pc.value + ' = ' + str(int(self.pc.value,2)) + '\n\n')
         state = self.sys.single_step(self.txt_step_info)
         if if_ss:
             self.txt_step_info.insert(INSERT, 'System Halted!\n\n')

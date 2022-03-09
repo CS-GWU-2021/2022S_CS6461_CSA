@@ -13,7 +13,7 @@ class Register:
     value: str type; the value of the register
     label: str type; the kind of the register
     """
-    def __init__(self, size=0, label=''):
+    def __init__(self, size=4, label='register'):
         self.size = size
         self.value = '0' * self.size
         self.label = label
@@ -44,12 +44,16 @@ class Register:
         ------------
         adder: the decimal number that going to be added to
         """
-        temp = bin(int(self.value,2) + adder)[2:]
-        print(temp)
+        value = int(self.value,2) + adder
+        if value >= 0:
+            temp = bin(value)[2:]
+        else:
+             temp = bin(value)[3:]
         if self.check_overflow(temp) != True:
             self.value = temp
         else:
             print(self.label + ' overflow error')
+        return value
 
     def reset(self):
         self.value = '0' * self.size
