@@ -378,24 +378,24 @@ class MainWindow:
         self.txt_step_info.insert(INSERT, 'Step: PC = ' + self.pc.value + ' = ' + str(int(self.pc.value,2)) + '\n\n')
         state = self.sys.single_step(self.txt_step_info)
         if if_ss:
-            self.txt_step_info.insert(INSERT, 'System Halted!\n\n')
+            self.txt_step_info.insert(INSERT, 'System Halted\n\n')
         self.txt_step_info.configure(state='disabled')
         #self.canvas.create_oval(5,15,20,30,fill="red")
         self.refresh_reg_info()
         self.refresh_mem_info()
         # Halt indicator for func_run
-        if state == 'HALT':
+        if state == 'DONE':
             return True
         return False
 
     def func_run(self):
         """This function implements RUN"""
         print('button run is pressed')
-        if_halt = False
+        if_done = False
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.delete(1.0, END)
-        while not if_halt:
-            if_halt = self.func_ss(False)
+        while not if_done:
+            if_done = self.func_ss(False)
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.insert(INSERT, 'System Halted!\n\n')
         self.txt_step_info.configure(state='disabled')

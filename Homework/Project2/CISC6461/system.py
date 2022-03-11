@@ -104,7 +104,9 @@ class System:
         It's called in GUI.fun_ipl
         """
         file_dir = './program1.txt'
+        file_dir = './ipl.txt'
         pc_default = bin(int('100',16))[2:]
+        pc_default = '1010'
         try:
             with open(file_dir, 'r') as f:
                 lines = f.readlines()
@@ -151,7 +153,9 @@ class System:
     def __decode(self, txt):
         """Decoding of instruciton"""
         txt.insert(INSERT, 'Decode Instruction \n')
-        return Instruction(self.ir.value)
+        word = Instruction(self.ir.value)
+        txt.insert(INSERT, 'Instruction :\t\t\t' + word.print_out() + '\n\n')
+        return word
 
     def __locate(self, txt, word):
         """Computation of EA"""
@@ -402,17 +406,14 @@ class System:
         op = int(word.opcode, 2)
         # Halt if op = 0
         if op == 0:
-            txt.insert(INSERT, 'OpCode is 0, Program is done\n\n')
-            return 'HALT'
-        txt.insert(INSERT, 'Instruction :\t\t\t' + word.print_out() + '\n\n')
-        # EA Compute
-        # for some operation x, i are ignored, which means no EA needed
+            txt.insert(INSERT, 'Program is done\n\n')
+            return 'DONE'
+        # EA Compute: for some operation x, i are ignored, which means no EA needed
         if op not in [6, 7, 13]:
             self.__locate(txt, word)
         # Excute and Deposit
         self.__execute_deposit(txt, word)
-        # PC++
-        # for some operation, pc++ is not needed
+        # PC++: for some operation, pc++ is not needed
         if op not in [8,9,10,11,12,14,15]:
             self.pc.next()
         txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n\n')
