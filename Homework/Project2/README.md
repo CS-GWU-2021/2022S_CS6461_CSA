@@ -41,7 +41,7 @@ user. Print the number entered by the user and the number closest to that number
 ### 4. Arithmetic and Logical Instructions
 |OpCode|Instruction|Name|Example|Description|Comment|
 |------|-----------|----|-------|-----------|-------|
-|4|AMR|Add Memory to Register|AMR r x i add|R=c(R)+c(EA|
+|4|AMR|Add Memory to Register|AMR r x i add|R=c(R)+c(EA)|
 |5|SMR|Subtract Memory from Register|SMR r x i add|R=c(R)-c(EA)|
 |6|AIR|Add Immediate to Register|AIR r immed|R=c(R)+Immed|x, i are ignored; do nothing if Immed=0; load r1 with Immed if c(r)=0|
 |7|SIR|Subtract Immediate to Register|SIR r immed|R=c(R)-Immed|x, i are ignored; do nothing if Immed=0; load r1 with -Immed if c(r)=0|
@@ -99,3 +99,25 @@ cc: Condition code, which has four 1-bit elements:
 
 For immediate instructions, the Address portion is considered to be the Immediate Value.
 (The maximum absolute value of the Immediate Value is 31. (5 bits without sign))
+
+### types of instructions format
+#### 1. HLT
+|Opcode|Ignored|
+|------|-------|
+|0-5(6)|6-15(10)|
+#### 2. TRAP
+|Opcode|Ignored|Trap Code|
+|------|-------|---------|
+|0-5(6)|6-15(10)|12-15(4)|
+#### 3. Load/Store
+|Opcode|R|IX|I|Address|
+|------|-|--|-|-------|
+|0-5(6)|6-7(2)|8-9(2)|10(1)|11-15(5)|
+#### 4. Arithmetic and Logical Instructions (Register to Register)
+|OpCode|Rx|Ry|Ignored|
+|------|--|--|-------|
+|0-5(6)|6-7(2)|8-9(2)|10-15(6)|
+#### 5. Shift/Rotate Instructions
+|OpCode|R|A/L|L/R|Ignored|Count|
+|------|-|---|---|-------|-----|
+|0-5(6)|6-7(2)|(8(1)|9(1)|10-11(2)|12-15(4)|
