@@ -3,6 +3,7 @@
 # this file contains the class of instruction
 #------------------------------------------------------
 
+
 class Instruction:
     """This is the class for Instruction:
     Parameters:
@@ -16,11 +17,11 @@ class Instruction:
             value = value.zfill(16)
         self.value = value
 
-        self.dict_opcode = {1 : 'LDR', 2 : 'STR', 3 : 'LDA',
+        self.dict_opcode = {0 : 'HLT', 1 : 'LDR', 2 : 'STR', 3 : 'LDA',
                             4 : 'AMR', 5 : 'SMR', 6 : 'AIR', 7 : 'SIR',
                             8 : 'JZ', 9 : 'JNE', 10 : 'JCC',
                             11 : 'JMA', 12 : 'JSR', 13 : 'RFS',
-                            14 : 'SOB', 15 : 'JGE',
+                            14 : 'SOB', 15 : 'JGE', 24 : 'TRAP',
                             33 : 'LDX', 34 : 'STX'}
         self.dict_opcode.setdefault(0, 'HLT')
 
