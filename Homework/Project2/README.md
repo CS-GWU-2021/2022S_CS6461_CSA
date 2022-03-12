@@ -27,7 +27,7 @@ A program that reads 20 numbers (integers) from the keyboard, prints the numbers
 a number from the user, and searches the 20 numbers read in for the number closest to the number entered by the 
 user. Print the number entered by the user and the number closest to that number.
 - Number range from (0, 65535)
-### 3. More Load&Store Instructions
+### 3. Transfer Instructions
 |OpCode|Instruction|Name|Example|Description|Comment|
 |------|-----------|----|-------|-----------|-------|
 |8|JZ|Jump If Zero|JZ r x i add|PC=EA if c(R)=0 else PC++|
