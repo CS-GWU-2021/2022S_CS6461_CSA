@@ -30,7 +30,7 @@ class System:
         self.x2 = IXR(label='IXR2')
         self.x3 = IXR(label='IXR3')
         # initialize ALU
-        self.alu = ALU()
+        self.alu = ALU(self.cc)
 
         # for refreshing
         self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3,
@@ -73,8 +73,7 @@ class System:
         """
         txt.insert(INSERT, 'MBR <- MEM[MAR]:\n')
         self.mbr.load_from_mem(self.mar, self.mem)
-        txt.insert(INSERT, 'MBR = MEM[' + str(int(self.mar.value, 2)
-                                              ) + '] = ' + str(int(self.mbr.value)) + '\n')
+        txt.insert(INSERT, 'MBR = MEM[' + self.mar.get_value() + '] = ' + str(int(self.mbr.value)) + '\n')
 
     def store(self, txt):
         """MEM[MAR] <- MBR
@@ -82,8 +81,8 @@ class System:
         """
         txt.insert(INSERT, 'MEM[MAR] <- MBR:\n')
         self.mbr.store_to_mem(self.mar, self.mem)
-        txt.insert(INSERT, 'MEM[' + str(int(self.mar.value, 2)) + '] = '
-                   + str(int(self.mem.memory[int(self.mar.value, 2)])) + '\n')
+        txt.insert(INSERT, 'MEM[' + self.mar.get_value() + '] = '
+                   + str(int(self.mem.get_from_memory(int(self.mar.value, 2)))) + '\n\n')
 
     def st_plus(self, txt):
         """MEM[MAR] <- MBR; MAR++
@@ -91,11 +90,11 @@ class System:
         """
         txt.insert(INSERT, 'MEM[MAR] <- MBR:\n')
         self.mbr.store_to_mem(self.mar, self.mem)
-        txt.insert(INSERT, 'MEM[' + str(int(self.mar.value, 2)) + '] = '
-                   + str(int(self.mem.memory[int(self.mar.value, 2)])) + '\n\n')
+        txt.insert(INSERT, 'MEM[' + self.mar.get_value() + '] = '
+                   + str(int(self.mem.get_from_memory(int(self.mar.value, 2)))) + '\n\n')
 
         txt.insert(INSERT, 'MAR++:\n')
-        self.mar.add_10(1)
+        self.mar.value = self.alu.arithmetic_cal('+', self.mar.value, '1')
         txt.insert(
             INSERT, 'MAR = ' + str(int(self.mar.value)) + '\n')
 
@@ -144,8 +143,7 @@ class System:
         txt.insert(INSERT, 'MAR <- PC :\t\t\tMAR = ' + self.mar.value + '\n')
         # MBR <- mem[MAR]
         self.mbr.load_from_mem(self.mar, self.mem)
-        txt.insert(INSERT, 'MBR <- MEM[' + str(int(self.mar.value, 2)
-                                               ) + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
+        txt.insert(INSERT, 'MBR <- MEM[' + self.mar.get_value() + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
         # IR <- MBR
         self.ir.get_from_MBR(self.mbr)
         txt.insert(INSERT, 'IR <- MBR :\t\t\tIR = ' + self.ir.value + '\n\n')
@@ -168,7 +166,7 @@ class System:
         ixr_id = int(word.ixr_index,2)
         if ixr_id != 0:
             ixr = self.xs[ixr_id-1]
-            iar.add_2(ixr.value)
+            iar.value = self.alu.arithmetic_cal('+', iar.value, ixr.value)
             txt.insert(INSERT, 'IAR += ' + ixr.label + ' :\t\t\tIAR = ' + iar.value + '\n')
         # IAR <- MEM[IAR] if I = 1
         if int(word.indirect,2) == 1:
@@ -182,17 +180,27 @@ class System:
     def __execute_deposit(self, txt, word):
         """The execution and depostion"""
         txt.insert(INSERT, 'Excute and Deposit Result \n')
-        op = int(word.opcode, 2)
-        gpr = self.gprs[int(word.gpr_index, 2)]
-        ixr = self.xs[int(word.ixr_index,2)-1]
         irr = Register(16,'IRR')
         ea = self.mar.value
-
+        op = int(word.opcode, 2)
+        if op in [16, 17, 18, 19, 20, 21]:
+            rx = self.gprs[int(word.rx,2)]
+            if op != 21:
+                ry = self.gprs[int(word.ry,2)]
+        elif op in [25, 26]:
+            a_l = int(word.a_l)
+            l_r = int(word.l_r)
+            count = int(word.count,2)
+            gpr = self.gprs[int(word.gpr_index, 2)]
+        else:
+            gpr = self.gprs[int(word.gpr_index, 2)]
+            ixr = self.xs[int(word.ixr_index,2)-1]
+            immed = word.address
         # LDR
         if op == 1:
             # MBR <- MEM[MAR]
             self.mbr.load_from_mem(self.mar,self.mem)
-            txt.insert(INSERT, 'MBR <- MEM['+ str(int(self.mar.value,2)) + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
+            txt.insert(INSERT, 'MBR <- MEM['+ self.mar.get_value() + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
             # IRR <- MBR
             irr.value = self.mbr.value
             txt.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
@@ -209,7 +217,7 @@ class System:
             txt.insert(INSERT, 'MBR <- IRR :\t\t\tMBR = ' + self.mbr.value + '\n')
             # MEM[MAR] <- MBR
             self.mbr.store_to_mem(self.mar, self.mem)
-            txt.insert(INSERT, 'MEM['+ str(int(self.mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(self.mar.value,2)) + '] = ' + self.mem.memory[int(self.mar.value,2)] + '\n')
+            txt.insert(INSERT, 'MEM['+ self.mar.get_value() + '] <- MBR :\t\t\tMEM['+ self.mar.get_value() + '] = ' + self.mem.memory[int(self.mar.value,2)] + '\n')
         # LDA
         elif op == 3:
             # MBR <- MAR
@@ -223,11 +231,11 @@ class System:
             txt.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
         # AMR: R=c(R)+c(EA)
         elif op == 4:
-            txt.insert(INSERT, gpr.label + ' + MEM['+ str(int(self.mar.value,2)) + ']:\t\t\t')
-            txt.insert(INSERT, str(int(gpr.value,2)) + ' + ' + str(int(self.mem.get_from_memory(int(self.mar.value,2)),2)) + '\n')
+            txt.insert(INSERT, gpr.label + ' + MEM['+ self.mar.get_value() + '] :\t\t\t')
+            txt.insert(INSERT, gpr.get_value() + ' + ' + self.mem.get_value(self.mar.value) + '\n')
             # MBR <- MEM[MAR]
             self.mbr.load_from_mem(self.mar,self.mem)
-            txt.insert(INSERT, 'MBR <- MEM['+ str(int(self.mar.value,2)) + '] :\t\t\tMBR = ' + str(int(self.mbr.value)) + '\n')
+            txt.insert(INSERT, 'MBR <- MEM['+ self.mar.get_value() + '] :\t\t\tMBR = ' + str(int(self.mbr.value)) + '\n')
             # IRR <- R[GPR] + MBR
             irr.value = self.alu.arithmetic_cal('+', gpr.value, self.mbr.value)
             txt.insert(INSERT, 'IRR <- ' + gpr.label + ' + MBR:\t\t\tIRR = ' + irr.value + '\n')
@@ -236,11 +244,11 @@ class System:
             txt.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
         # SMR: R=c(R)-c(EA)
         elif op == 5:
-            txt.insert(INSERT, gpr.label + ' - MEM['+ str(int(self.mar.value,2)) + ']:\t\t\t')
-            txt.insert(INSERT, str(int(gpr.value,2)) + ' - ' + str(int(self.mem.get_from_memory(int(self.mar.value,2)),2)) + '\n')
+            txt.insert(INSERT, gpr.label + ' - MEM['+ self.mar.get_value() + '] :\t\t\t')
+            txt.insert(INSERT, gpr.get_value() + ' - ' + self.mem.get_value(self.mar.value) + '\n')
             # MBR <- MEM[MAR]
             self.mbr.load_from_mem(self.mar,self.mem)
-            txt.insert(INSERT, 'MBR <- MEM['+ str(int(self.mar.value,2)) + '] :\t\t\tMBR = ' + str(int(self.mbr.value)) + '\n')
+            txt.insert(INSERT, 'MBR <- MEM['+ self.mar.get_value() + '] :\t\t\tMBR = ' + str(int(self.mbr.value)) + '\n')
             # IRR <- R[GPR] + MBR
             irr.value = self.alu.arithmetic_cal('-', gpr.value, self.mbr.value)
             txt.insert(INSERT, 'IRR <- ' + gpr.label + ' - MBR:\t\t\tIRR = ' + irr.value + '\n')
@@ -249,7 +257,7 @@ class System:
             txt.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
         # AIR: R=c(R)+Immed
         elif op == 6:
-            immed = word.address
+            txt.insert(INSERT, gpr.label + ' + Immed : \t\t\t' + gpr.get_value() + ' + ' + str(int(immed,2)) + '\n')
             # IRR <- R[GPR] + Immed
             irr.value = self.alu.arithmetic_cal('+', gpr.value, immed)
             txt.insert(INSERT, 'IRR <- ' + gpr.label + ' + Immed:\t\t\tIRR = ' + irr.value + '\n')
@@ -258,7 +266,7 @@ class System:
             txt.insert(INSERT, gpr.label + ' <- IRR :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
         # SIR: R=c(R)-Immed
         elif op == 7:
-            immed = word.address
+            txt.insert(INSERT, gpr.label + ' - Immed : \t\t\t' + gpr.get_value() + ' - ' + str(int(immed,2)) + '\n')
             # IRR <- R[GPR] - Immed
             irr.value = self.alu.arithmetic_cal('-', gpr.value, immed)
             txt.insert(INSERT, 'IRR <- ' + gpr.label + ' - Immed:\t\t\tIRR = ' + irr.value + '\n')
@@ -312,14 +320,14 @@ class System:
         # RFS: R0=Immed; PC=c(R3)
         # if c(R3).len > pc.size pc=c(r3)[-pc.size:]
         elif op == 13:
-            immed = word.address
             self.gpr0.value = immed
             txt.insert(INSERT, 'GPR0 <- Immed :\t\t\tGPR0 = ' + self.gpr0.value + '\n')
             self.pc.value = str(int(self.gpr3.value[-self.pc.size:]))
             txt.insert(INSERT, 'PC <- GPR3 :\t\t\tPC = ' + self.pc.value + '\n')
         # SOB: R=c(R)-1; PC=EA if C(R)>0 else PC++
         elif op == 14:
-            gpr_value = gpr.add_10(-1)
+            gpr.value = self.alu.arithmetic_cal('-', gpr.value, '1')
+            gpr_value = self.alu.value
             # 需要修改小于0时候的表达方式
             if gpr_value > 0:
                 txt.insert(INSERT, gpr.label + ' -- :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
@@ -327,7 +335,7 @@ class System:
                 self.pc.value = ea
                 txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n')
             else:
-                txt.insert(INSERT, gpr.label + ' -- :\t\t\t' + gpr.label + ' = -' + gpr.value + '\n')
+                txt.insert(INSERT, gpr.label + ' -- :\t\t\t' + gpr.label + ' = ' + str(gpr_value) + '\n')
                 txt.insert(INSERT, gpr.label + ' <= 0\n')
                 self.pc.next()
                 txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
@@ -344,33 +352,97 @@ class System:
                 txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
         # MLT: Rx, Rx+1=c(Rx)*(Ry)
         elif op == 16:
-            pass
+            if int(word.rx,2) not in [0,2] or int(word.ry,2) not in [0,2]:
+                txt.insert(INSERT, "Rx, Ry must be 0 or 2\n")
+            else:
+                # Rx+1
+                rxx = self.gprs[int(word.rx,2)+1]
+                txt.insert(INSERT, rx.label + ' * ' + ry.label + ' :\t\t\t' + rx.get_value() + ' * ' + ry.get_value() + '\n')
+                # IRR = Rx * Ry
+                irr.value = self.alu.arithmetic_cal('*', rx.value, ry.value)
+                txt.insert(INSERT, "IRR <- Rx * Ry\t\t\tIRR = " + irr.value + '\n')
+                # Rx = Highter bits
+                # Rx+1 = Lower bits
+                rx.value = irr.value
+                txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.label + ' = ' + rx.value + '\n\n')
+                txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
         # DVD: Rx, Rx+1=c(Rx)/(Ry)
         elif op == 17:
-            pass
+            if int(word.rx,2) not in [0,2] or int(word.ry,2) not in [0,2]:
+                txt.insert(INSERT, "Rx, Ry must be 0 or 2\n")
+            else:
+                txt.insert(INSERT, rx.label + ' / ' + ry.label + ' :\t\t\t' + rx.get_value() + ' / ' + ry.get_value() + '\n')
+                # Ry = 0 -> cc = DIVZERO
+                if int(ry.value,2) == 0:
+                    self.cc.set_state('DIVZERO')
+                    txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
+                else:
+                    # Rx+1
+                    rxx = self.gprs[int(word.rx,2)+1]
+                    # Rx = Rx / Ry
+                    irr.value = self.alu.arithmetic_cal('/', rx.value, ry.value)
+                    txt.insert(INSERT, "IRR <- Rx / Ry\t\t\tIRR = " + irr.value + '\n')
+                    rx.value = irr.value
+                    txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.label + ' = ' + rx.value + '\n\n')
+                    # Rx+1 <- Rx % Ry
+                    irr.value = self.alu.arithmetic_cal('%', rx.value, ry.value)
+                    txt.insert(INSERT, "IRR <- Rx % Ry\t\t\tIRR = " + irr.value + '\n')
+                    rxx.value = irr.value
+                    txt.insert(INSERT, rxx.label + ' <- IRR\t\t\t' + rxx.label + ' = ' + rxx.value + '\n\n')
         # TRR: cc(4)=1 if c(Rx)=c(Ry) else cc(r)=0
         elif op == 18:
-            pass
+            if int(rx.value,2) == int(ry.value,2):
+                self.cc.set_state('EQUALORNOT')
+                txt.insert(INSERT, rx.label + ' = ' + ry.label + ' :\t\t\t' + rx.get_value() + ' = ' + ry.get_value() + '\n')
+                txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
+            else:
+                self.cc.reset()
+                txt.insert(INSERT, rx.label + ' != ' + ry.label + ' :\t\t\t' + rx.get_value() + ' != ' + ry.get_value() + '\n')
+                txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
         # AND: c(Rx)=c(Rx) AND c(Ry)
         elif op == 19:
-            pass
+            txt.insert(INSERT, rx.label + ' :\t\t\t' + rx.value + '\n')
+            txt.insert(INSERT, ry.label + ' :\t\t\t' + ry.value + '\n')
+            irr.value = self.alu.logic_cal('&', rx.value, ry.value)
+            txt.insert(INSERT,'IRR = Rx & Ry :\t\t\t' + irr.value.zfill(irr.size) + '\n')
+            rx.value = irr.value
+            txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.label + ' = ' + rx.value + '\n\n')
         # ORR: c(Rx)=c(Rx) OR c(Ry)
         elif op == 20:
-            pass
+            txt.insert(INSERT, rx.label + ' :\t\t\t' + rx.value + '\n')
+            txt.insert(INSERT, ry.label + ' :\t\t\t' + ry.value + '\n')
+            irr.value = self.alu.logic_cal('|', rx.value, ry.value)
+            txt.insert(INSERT,'IRR = Rx | Ry :\t\t\t' + irr.value.zfill(irr.size) + '\n')
+            rx.value = irr.value
+            txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.label + ' = ' + rx.value + '\n\n')
         # NOT: c(Rx)=NOT c(Rx)
         elif op == 21:
-            pass
+            txt.insert(INSERT, rx.label + ' :\t\t\t' + rx.value + '\n')
+            irr.value = self.alu.logic_cal('NOT', rx.value)
+            txt.insert(INSERT,'IRR = ~ Rx  :\t\t\t' + irr.value.zfill(irr.size) + '\n')
+            rx.value = irr.value
+            txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.label + ' = ' + rx.value + '\n\n')
         # SRC: c(R) is shifted left(L/R=1) or right(L/R=0) either logically(A/L=1) or arithmetically(A/L=0)
         elif op == 25:
-            pass
+            lr = 'left' if l_r == 1 else 'right'
+            al = 'logically' if a_l == 1 else 'arithmetically'
+            txt.insert(INSERT, gpr.label + ' is shifted ' + lr + ' ' + al + '\n')
+            gpr.value = self.alu.shift(gpr.value.zfill(gpr.size), count, l_r, a_l)
+            txt.insert(INSERT, gpr.label + ' :\t\t\t' + gpr.value + '\n')
+            txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
         # RRC: c(R) is Rotated left(L/R=1) or right(L/R=0) either logically(A/L=1)
         elif op == 26:
-            pass
+            al = 'logically' if a_l == 1 else 'arithmetically'
+            lr = 'left' if l_r == 1 else 'right'
+            txt.insert(INSERT, gpr.label + ' is rotated ' + lr + ' ' + al + '\n')
+            gpr.value = self.alu.rotate(gpr.value.zfill(gpr.size), count, l_r, a_l)
+            txt.insert(INSERT, gpr.label + ' :\t\t\t' + gpr.value + '\n')
+            txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
         # LDX
         elif op == 33:
             # MBR <- MEM[MAR]
             self.mbr.load_from_mem(self.mar,self.mem)
-            txt.insert(INSERT, 'MBR <- MEM[' + str(int(self.mar.value,2)) + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
+            txt.insert(INSERT, 'MBR <- MEM[' + self.mar.get_value() + '] :\t\t\tMBR = ' + self.mbr.value + '\n')
             # IRR <- MBR
             irr.value = self.mbr.value
             txt.insert(INSERT, 'IRR <- MBR :\t\t\tIRR = ' + irr.value + '\n')
@@ -387,7 +459,7 @@ class System:
             txt.insert(INSERT, 'MBR <- IRR :\t\t\tMBR = ' + self.mbr.value + '\n')
             # MEM[MAR] <- MBR
             self.mbr.store_to_mem(self.mar, self.mem)
-            txt.insert(INSERT, 'MEM['+ str(int(self.mar.value,2)) + '] <- MBR :\t\t\tMEM['+ str(int(self.mar.value,2)) + '] = ' + self.mem.memory[int(self.mar.value,2)] + '\n')
+            txt.insert(INSERT, 'MEM['+ self.mar.value.get_value() + '] <- MBR :\t\t\tMEM['+self.mar.value.get_value() + '] = ' + self.mem.memory[int(self.mar.value,2)] + '\n')
         # IN
         elif op == 49:
             pass
@@ -409,7 +481,7 @@ class System:
             txt.insert(INSERT, 'Program is done\n\n')
             return 'DONE'
         # EA Compute: for some operation x, i are ignored, which means no EA needed
-        if op not in [6, 7, 13]:
+        if op not in [6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26]:
             self.__locate(txt, word)
         # Excute and Deposit
         self.__execute_deposit(txt, word)
@@ -424,24 +496,9 @@ class System:
         """
         i = Instruction()
         msg = i.decode_test(ins)
-        if msg == 'NUMERROR':
-            txt.insert(INSERT, 'Args Number Error\nPlease input again (e.g. LDR 1 0 0 31)\n\n')
-            return
-        elif msg =='OPERROR':
-            txt.insert(INSERT, 'Operation ERROR\nPlease input again\n\n')
-            return
-        elif msg =='GPRERROR':
-            txt.insert(INSERT, 'GPR ERROR\nGPR should be 0, 1, 2 or 3\n\n')
-            return
-        elif msg =='IXRERROR':
-            txt.insert(INSERT, 'IXR ERROR\nIXR should be 0, 1, 2, or 3\n\n')
-            return
-        elif msg =='IERROR':
-            txt.insert(INSERT, 'Indirect ERROR\nIndirect should be 1 or 0\n\n')
-            return
-        txt.insert(INSERT, 'Valid Instruction detected\n')
-        txt.insert(INSERT, 'Decoded\n\n')
-        # for some operation x, i are ignored, which means no EA needed
-        if int(i.opcode,2) not in [6, 7, 13]:
-            self.__locate(txt, i)
-        self.__execute_deposit(txt, i)
+        txt.insert(INSERT, msg)
+        if msg == 'Decoding Complete\n\n':
+            # for some operation x, i are ignored, which means no EA needed
+            if int(i.opcode,2) not in [6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26]:
+                self.__locate(txt, i)
+            self.__execute_deposit(txt, i)
