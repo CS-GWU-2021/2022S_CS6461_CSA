@@ -58,7 +58,7 @@ OpCode format
 |18|TRR|Test the Equality Of Register and Register|TRR rx ry|cc(4)=1 if c(Rx)=c(Ry) else cc(r)=0|
 |19|AND|Logical And of Register and Register|AND rx ry|c(Rx)=c(Rx) AND c(Ry)|
 |20|ORR|Logical Or of Register and Register|ORR rx ry|c(Rx)=c(Rx) OR c(Ry)|
-|21|NOT|Logical Not of Register to Register|NOT rx ry|c(Rx)=NOT c(Rx)|
+|21|NOT|Logical Not of Register to Register|NOT rx|c(Rx)=NOT c(Rx)|
 ### 6. Shift/Rotate Instructions
 OpCode format
 |OpCode|R|A/L|L/R|Ignored|Count|
