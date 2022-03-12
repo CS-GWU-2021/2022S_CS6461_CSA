@@ -196,6 +196,7 @@ class System:
             gpr = self.gprs[int(word.gpr_index, 2)]
             ixr = self.xs[int(word.ixr_index,2)-1]
             immed = word.address
+            devid = word.address
         # LDR
         if op == 1:
             # MBR <- MEM[MAR]

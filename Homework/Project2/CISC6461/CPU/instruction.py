@@ -76,7 +76,8 @@ class Instruction:
         # Arithmetic and Logical Instructions (Register to Register)
         elif opcode_value in [16, 17, 18, 19, 20, 21]:
             word += str(int(self.rx,2)) + ' '
-            word += str(int(self.ry,2)) + ' '
+            if opcode_value != 21:
+                word += str(int(self.ry,2)) + ' '
         # Shift/Rotate Instructions
         elif opcode_value in [25, 26]:
             word += str(int(self.gpr_index,2)) + ' '
