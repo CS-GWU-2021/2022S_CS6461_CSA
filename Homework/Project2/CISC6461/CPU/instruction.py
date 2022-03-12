@@ -38,9 +38,9 @@ class Instruction:
         self.l_r = []
         self.count = []
 
-        self.__update()
+        self.update()
 
-    def __update(self):
+    def update(self):
         """This function decodes the instruciton and can be used to refresh the values
         """
         self.opcode = self.value[:6]
@@ -55,15 +55,15 @@ class Instruction:
             self.a_l = self.value[8]
             self.l_r = self.value[9]
             self.count = self.value[12:]
-        else:
-            self.gpr_index = self.value[6:8]
-            self.ixr_index = self.value[8:10]
-            self.indirect = self.value[10]
-            self.address = self.value[11:]
+
+        self.gpr_index = self.value[6:8]
+        self.ixr_index = self.value[8:10]
+        self.indirect = self.value[10]
+        self.address = self.value[11:]
 
     def reset(self):
         self.value = '0' * 16
-        self.__update()
+        self.update()
 
     def print_out(self):
         """This function translates the instruction and prints it out at the Step_info
@@ -91,24 +91,76 @@ class Instruction:
 
     def decode_test(self, ins_test):
         dict = {str:num for num,str in self.dict_opcode.items()}
-        if len(ins_test.split(' ')) != 5:
-            print('Wrong Number of args')
-            return 'NUMERROR'
-        self.opcode, self.gpr_index, self.ixr_index, self.indirect, self.address = ins_test.split(' ')
-        if self.opcode not in dict.keys():
-            print("Wrong Operation")
-            return 'OPERROR'
-        if int(self.gpr_index) not in [0,1,2,3]:
-            print("Wrong Gpr")
-            return 'GPRERROR'
-        if int(self.ixr_index) not in [0,1,2,3]:
-            print("Wrong IXR")
-            return 'IXRERROR'
-        if int(self.indirect) not in [0,1]:
-            print("Wrong Indirect")
-            return 'IERROR'
-        self.opcode = bin(dict[self.opcode])[2:]
-        self.gpr_index = bin(int(self.gpr_index))[2:]
-        self.ixr_index = bin(int(self.ixr_index))[2:]
-        self.indirect = bin(int(self.indirect))[2:]
-        self.address = bin(int(self.address))[2:]
+        ins_test = ins_test.split(' ')
+        opcode = ins_test[0]
+        num = len(ins_test)
+        if opcode not in dict.keys():
+            return("Unknown Operation")
+        else:
+            self.opcode = dict[opcode]
+
+        # Arithmetic and Logical Instructions (Register to Register)
+        if self.opcode in [16, 17, 18, 19, 20]:
+            if num != 3:
+                return(opcode + ' needs two paras: ' + opcode + ' rx ry\n')
+            else:
+                rx = int(ins_test[1])
+                ry = int(ins_test[2])
+                if rx not in [0,1,2,3]:
+                    return("Rx should be 0, 1, 2 or 3\n")
+                elif ry not in [0,1,2,3]:
+                    return("Ry should be 0, 1, 2 or 3\n")
+                else:
+                    self.opcode = bin(self.opcode)[2:]
+                    self.rx = bin(rx)[2:]
+                    self.ry = bin(ry)[2:]
+        elif self.opcode == 21:
+            if num != 2:
+                return(opcode + ' needs one para: ' + opcode + ' rx\n')
+            else:
+                rx = int(ins_test[1])
+                if rx not in [0,1,2,3]:
+                    return("Rx should be 0, 1, 2 or 3\n")
+                else:
+                    self.opcode = bin(self.opcode)[2:]
+                    self.rx = bin(rx)[2:]
+        # Shift/Rotate Instructions
+        elif self.opcode in [25, 26]:
+            if num != 5:
+                return(opcode + ' needs 4 paras: ' + opcode + ' R Count L/R A/L\n')
+            else:
+                r, count, l_r, a_l = ins_test[1:]
+                if int(r) not in [0,1,2,3]:
+                    return("R should be 0, 1, 2 or 3\n")
+                elif int(count) > 15 or int(count) < 0:
+                    return("Count should be in range of 0:15")
+                elif int(l_r) not in [0,1]:
+                    return("L/R should be 0 or 1\n")
+                elif int(a_l) not in [0,1]:
+                    return("A/L should be 0 or 1\n")
+                else:
+                    self.opcode = bin(self.opcode)[2:]
+                    self.gpr_index = bin(int(r))[2:]
+                    self.count = bin(int(count))[2:]
+                    self.l_r = bin(int(l_r))[2:]
+                    self.a_l = bin(int(a_l))[2:]
+        else:
+            if num != 5:
+                msg = opcode + ' needs 4 paras: r  x  i  add\n'
+                msg += 'Set 0 if a para is ignored\n'
+                return(msg)
+            else:
+                r, x, i, add = ins_test[1:]
+                if int(r) not in [0,1,2,3]:
+                    return 'R should be 0, 1, 2 or 3\n'
+                elif int(x) not in [0,1,2,3]:
+                    return 'X should be 0, 1, 2 or 3\n'
+                elif int(i) not in [0,1]:
+                    return("I should be 0 or 1\n")
+                else:
+                    self.opcode = bin(self.opcode)[2:]
+                    self.gpr_index = bin(int(r))[2:]
+                    self.ixr_index = bin(int(x))[2:]
+                    self.indirect = bin(int(i))[2:]
+                    self.address = bin(int(add))[2:]
+        return 'Decoding Complete\n\n'
