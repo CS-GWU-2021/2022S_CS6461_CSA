@@ -103,9 +103,9 @@ class System:
         It's called in GUI.fun_ipl
         """
         file_dir = './program1.txt'
-        file_dir = './ipl.txt'
+        #file_dir = './ipl.txt'
         pc_default = bin(int('100',16))[2:]
-        pc_default = '1010'
+        #pc_default = '1010'
         try:
             with open(file_dir, 'r') as f:
                 lines = f.readlines()
@@ -280,36 +280,36 @@ class System:
             if int(gpr.value,2) == 0:
                 txt.insert(INSERT, gpr.label + ' == 0\n')
                 self.pc.value = ea
-                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 txt.insert(INSERT, gpr.label + ' != 0\n')
                 self.pc.next()
-                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JNE: PC=EA if c(R)!=0 else PC++
         elif op == 9:
             txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
             if int(gpr.value,2) != 0:
                 txt.insert(INSERT, gpr.label + ' != 0\n')
                 self.pc.value = ea
-                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 txt.insert(INSERT, gpr.label + ' == 0\n')
                 self.pc.next()
-                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JCC: PC=EA if CC[r]=1 else PC++
         elif op == 10:
             index = int(word.gpr_index,2)
             txt.insert(INSERT, 'CC[' + str(index) +'] = ' + self.cc.value[index] + '\n')
             if int(self.cc.value[index]) == '1':
                 self.pc.value = ea
-                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 self.pc.next()
-                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JMA:  PC=EA
         elif op == 11:
             self.pc.value = ea
-            txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+            txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JSR: R3=PC+1; PC=EA
         elif op == 12:
             self.pc.next()
@@ -317,14 +317,14 @@ class System:
             self.gpr3.value = self.pc.value
             txt.insert(INSERT, 'GPR3 <- PC :\t\t\tGPR3 = ' + self.gpr3.value + '\n')
             self.pc.value = ea
-            txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n')
+            txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
         # RFS: R0=Immed; PC=c(R3)
         # if c(R3).len > pc.size pc=c(r3)[-pc.size:]
         elif op == 13:
             self.gpr0.value = immed
             txt.insert(INSERT, 'GPR0 <- Immed :\t\t\tGPR0 = ' + self.gpr0.value + '\n')
             self.pc.value = str(int(self.gpr3.value[-self.pc.size:]))
-            txt.insert(INSERT, 'PC <- GPR3 :\t\t\tPC = ' + self.pc.value + '\n')
+            txt.insert(INSERT, 'PC <- GPR3 :\t\t\tPC = ' + self.pc.value + '\n\n')
         # SOB: R=c(R)-1; PC=EA if C(R)>0 else PC++
         elif op == 14:
             gpr.value = self.alu.arithmetic_cal('-', gpr.value, '1')
@@ -334,23 +334,23 @@ class System:
                 txt.insert(INSERT, gpr.label + ' -- :\t\t\t' + gpr.label + ' = ' + gpr.value + '\n')
                 txt.insert(INSERT, gpr.label + ' > 0\n')
                 self.pc.value = ea
-                txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 txt.insert(INSERT, gpr.label + ' -- :\t\t\t' + gpr.label + ' = ' + str(gpr_value) + '\n')
                 txt.insert(INSERT, gpr.label + ' <= 0\n')
                 self.pc.next()
-                txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n\n')
         # JGE: PC=EA if c(R)>=0 else PC++ 这玩意儿能小于0？
         elif op == 15:
             txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
             if int(gpr.value,2) >= 0:
                 txt.insert(INSERT, gpr.label + ' >= 0\n')
                 self.pc.value = ea
-                txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC <- EA : \t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 txt.insert(INSERT, gpr.label + ' < 0\n')
                 self.pc.next()
-                txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n')
+                txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n\n')
         # MLT: Rx, Rx+1=c(Rx)*(Ry)
         elif op == 16:
             if int(word.rx,2) not in [0,2] or int(word.ry,2) not in [0,2]:
@@ -489,7 +489,7 @@ class System:
         # PC++: for some operation, pc++ is not needed
         if op not in [8,9,10,11,12,14,15]:
             self.pc.next()
-        txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n\n')
+            txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n\n')
 
     def test_ins(self, ins, txt):
         """This function implements testing of input instrucitons
