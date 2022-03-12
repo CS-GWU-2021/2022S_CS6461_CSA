@@ -28,3 +28,7 @@ class Memory:
 
     def reset_memory(self):
         self.memory = ['0'] * self.size
+
+    def get_value(self, address):
+        address = int(address,2)
+        return str(int(self.memory[address],2))
