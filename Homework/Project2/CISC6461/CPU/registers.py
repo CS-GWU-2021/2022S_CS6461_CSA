@@ -18,7 +18,7 @@ class Register:
         self.value = '0' * self.size
         self.label = label
 
-    def check_overflow(self, input_value) -> bool:
+    def check_overflow(self, input_value):
         """This function returns True when register overflows
         Parameters:
         ------------
@@ -26,36 +26,38 @@ class Register:
         """
         return True if len(input_value) > self.size else False
 
-    def add_2(self, adder : str):
-        """This function adds a binary value to the register
-        Parameters:
-        ------------
-        adder: the binary number that going to be added to
-        """
-        temp = bin(int(self.value,2) + int(adder,2))[2:]
-        if self.check_overflow(temp) != True:
-            self.value = temp
+    def check_state(self, input_value):
+        """This function checks if the value cause fault"""
+        max = int('1'*self.size,2)
+        min = int('0'*self.size,2)
+        if input_value > max:
+            return 'OVERFLOW'
+        elif input_value < min:
+            return 'UNDERFLOW'
         else:
-            print(self.label + ' overflow error')
+            return '0000'
 
     def add_10(self, adder : int):
-        """This function adds a decimal value to the register
+        """This function adds value and return the state of the register
         Parameters:
         ------------
         adder: the decimal number that going to be added to
         """
         value = int(self.value,2) + adder
         if value >= 0:
-            temp = bin(value)[2:]
+            temp = bin(value)[2:].zfill(self.size)
         else:
-             temp = bin(value)[3:]
-        if self.check_overflow(temp) != True:
-            self.value = temp
-        else:
-            print(self.label + ' overflow error')
-        return value
+             temp = bin(value)[3:].zfill(self.size)
+        state = self.check_state(value)
+        self.value = str(int(temp[-self.size:]))
+        return state
+
+    def get_value(self):
+        """Return str type of decimal value"""
+        return str(int(self.value,2))
 
     def reset(self):
+        """This function resets the register"""
         self.value = '0' * self.size
 
 class PC(Register):
@@ -122,6 +124,25 @@ class CC(Register):
     """
     def __init__(self, size=4, label='CC'):
         super().__init__(size=size, label=label)
+        self.state = '0000'
+
+    def reset(self):
+        self.value = '0' * self.size
+        self.state = '0000'
+
+    def set_state(self, state : str):
+        self.reset()
+        self.state = state
+        value = list(self.value)
+        if state == 'OVERFLOW':
+            value[0] = '1'
+        elif state == 'UNDERFLOW':
+            value[1] = '1'
+        elif state == 'DIVZERO':
+            value[2] = '1'
+        elif state == 'EQUALORNOT':
+            value[3] = '1'
+        self.value = ''.join(value)
 
 class MFR(Register):
     """This is the class of Memory Falut Register
