@@ -2,8 +2,6 @@
 # @Author:      Tenphun0503 & Jimmy;
 # this file contains the class of instruction
 #------------------------------------------------------
-
-
 class Instruction:
     """This is the class for Instruction:
     Parameters:

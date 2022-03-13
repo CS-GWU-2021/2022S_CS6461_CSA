@@ -3,7 +3,7 @@
 # This file contains all of the needed registers class
 # PC MAR MBR IR CC MFR GPR IXR
 #-----------------------------------------------------------------
-from memory import *
+from Memory.cache import *
 
 class Register:
     """This class is the super class of all of registers
@@ -93,18 +93,6 @@ class MBR(Register):
     """
     def __init__(self, size=16, label='MBR'):
         super().__init__(size=size, label=label)
-
-    def load_from_mem(self, mar : MAR, mem : Memory):
-        """The function for MBR <- MEM[MAR]
-        """
-        address = int(''.join(mar.value),2)
-        self.value = mem.get_from_memory(address)
-
-    def store_to_mem(self, mar : MAR, mem : Memory):
-        """The function for MEM[MAR] <- MBR
-        """
-        address = int(''.join(mar.value),2)
-        mem.set_to_memory(address,self.value)
 
 class IR(Register):
     """This is the class of Instruction Register

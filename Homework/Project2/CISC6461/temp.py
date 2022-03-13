@@ -1,6 +1,6 @@
 from CPU.registers import *
 from CPU.ALU import *
+from Memory.cache import *
 
-value = '10010'
-temp = value[1:] + value[0]
-print(temp)
+c = '1'*32
+print(c[17:])
