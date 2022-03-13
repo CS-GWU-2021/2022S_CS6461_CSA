@@ -18,7 +18,6 @@
 ## 3. Description
 ### 1. Cache
 Cache sits between memory and the rest of the processor
-- cache line
 - a simple FIFO algorithm to replace cache lines
 - number of cache line (e.g. 16 cahce for 2048)
 - demonstrate that cache works (e.g. tracing data)
