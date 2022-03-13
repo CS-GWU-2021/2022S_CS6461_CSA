@@ -11,6 +11,10 @@ class ALU:
         self.value = 0
         self.cc = cc
 
+    def reset(self):
+        self.irr.reset()
+        self.value = 0
+
     def arithmetic_cal(self, operation : str, o1 : str, o2 : str):
         """This function does arithmetic calculation
         operation can be one of:
