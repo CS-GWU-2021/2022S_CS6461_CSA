@@ -11,7 +11,7 @@
 - File containing program 1 as machine code
 - Demonstration that program 1 works
 - Demonstration that individual instructions work
-- User instructin
+- User instruction
 - Design notes
 - Source code
 
