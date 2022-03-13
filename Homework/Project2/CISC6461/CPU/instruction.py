@@ -83,6 +83,10 @@ class Instruction:
             word += str(int(self.gpr_index,2)) + ' '
             word += self.a_l + ' '
             word += self.l_r + ' '
+        # IO
+        elif opcode_value in[49, 50]:
+            word += str(int(self.gpr_index,2)) + ' '
+            word += str(int(self.address,2))
         else:
             word += str(int(self.gpr_index,2)) + ' '
             word += str(int(self.ixr_index,2)) + ' '
@@ -145,6 +149,18 @@ class Instruction:
                     self.count = bin(int(count))[2:]
                     self.l_r = bin(int(l_r))[2:]
                     self.a_l = bin(int(a_l))[2:]
+        # IO
+        elif self.opcode in[49, 50]:
+            if num != 3:
+                return(opcode + ' needs 2 paras: ' + opcode + ' R DevID\n')
+            else:
+                r, id = ins_test[1:]
+                if int(r) not in [0,1,2,3]:
+                    return("R should be 0, 1, 2 or 3\n")
+                else:
+                    self.opcode = bin(self.opcode)[2:]
+                    self.gpr_index = bin(int(r))[2:]
+                    self.address = bin(int(id))[2:]
         else:
             if num != 5:
                 msg = opcode + ' needs 4 paras: r  x  i  add\n'
