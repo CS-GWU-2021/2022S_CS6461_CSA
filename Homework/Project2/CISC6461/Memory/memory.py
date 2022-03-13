@@ -2,7 +2,6 @@
 # @Author:      Tenphun0503
 # this file contains the class of memory
 #------------------------------------------------------
-
 class Memory:
     """This is the class for Memory:
     Parameters:
@@ -12,6 +11,9 @@ class Memory:
     """
     def __init__(self):
         self.size = 2048
+        self.memory = ['0'] * self.size
+
+    def reset(self):
         self.memory = ['0'] * self.size
 
     def memory_expansion(self):
@@ -26,9 +28,15 @@ class Memory:
     def set_to_memory(self, address, value):
         self.memory[address] = value
 
-    def reset_memory(self):
-        self.memory = ['0'] * self.size
-
     def get_value(self, address):
+        """This function is for Step_info
+        it returns string type of decimal values
+        """
         address = int(address,2)
         return str(int(self.memory[address],2))
+
+    def print_out(self):
+        word = '\n-------------MEMORY--------------\n'
+        for i, line in enumerate(self.memory):
+            word += str(i) + ':\t' + str(int(line)) + '\n'
+        return word
