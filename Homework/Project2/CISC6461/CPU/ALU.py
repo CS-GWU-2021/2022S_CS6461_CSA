@@ -3,7 +3,6 @@
 # This file implements ALU
 #-----------------------------------------------------------------
 from CPU.registers import *
-from memory import *
 
 class ALU:
     def __init__(self, cc):
@@ -12,7 +11,7 @@ class ALU:
         self.cc = cc
 
     def reset(self):
-        self.irr.reset()
+        self.irr = Register(16, 'IRR')
         self.value = 0
 
     def arithmetic_cal(self, operation : str, o1 : str, o2 : str):
@@ -30,6 +29,7 @@ class ALU:
         elif operation == '-':
             self.value = o1_value - o2_value
         elif operation == '*':
+            self.irr.size = 32
             self.value = o1_value * o2_value
         elif operation == '/':
             self.value = int(o1_value / o2_value)
