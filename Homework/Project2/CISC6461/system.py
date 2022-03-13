@@ -117,7 +117,7 @@ class System:
                 lines = f.readlines()
             f.close()
         except FileNotFoundError:
-            txt_ipl_info.insert(INSERT, self.file_dir + 'does not exist')
+            txt_ipl_info.insert(INSERT, self.file_dir + ' does not exist')
             return
 
         for i in lines:

@@ -4,7 +4,7 @@ from system import System
 
 if __name__ == '__main__':
 
-    file_dir = './Programs/program.txt'
+    file_dir = './program1.txt'
     pc_default = 6
 
     #file_dir = './Programs/program1.txt'
