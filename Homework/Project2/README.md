@@ -10,7 +10,7 @@
 - An executable file, running program 1
 - File containing program 1 as machine code
 - Demonstration that program 1 works
-- Demostration that individual instructions work
+- Demonstration that individual instructions work
 - User instructin
 - Design notes
 - Source code
