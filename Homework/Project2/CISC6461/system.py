@@ -8,9 +8,10 @@ from CPU.registers import *
 from CPU.instruction import *
 from CPU.ALU import *
 from memory import *
+from ioDevice import *
 
 class System:
-    def __init__(self):
+    def __init__(self, file_dir, pc_default):
         # initialize memory
         self.mem = Memory()
         # initialize an instruction object
@@ -38,7 +39,14 @@ class System:
         self.gprs = [self.gpr0, self.gpr1, self.gpr2, self.gpr3]
         self.xs = [self.x1, self.x2, self.x3]
 
-    def reset(self):
+        # initialize io devices
+        self.keyboard = Keyboard()
+        self.printer = Printer()
+
+        self.file_dir = file_dir
+        self.pc_default = pc_default
+
+    def reset(self, output):
         """This function resets the system
         It's called in GUI.resets
         """
@@ -46,6 +54,12 @@ class System:
         for reg in self.registers:
             reg.reset()
         self.ins.reset()
+        self.alu.reset()
+        self.keyboard.reset()
+        self.printer.reset()
+        output.configure(state='normal')
+        output.delete(1.0, END)
+        output.configure(state='disabled')
 
     def set_instruction(self, index):
         """This function sets the bit of instruciton into 1 or 0
@@ -94,7 +108,7 @@ class System:
                    + str(int(self.mem.get_from_memory(int(self.mar.value, 2)))) + '\n\n')
 
         txt.insert(INSERT, 'MAR++:\n')
-        self.mar.value = self.alu.arithmetic_cal('+', self.mar.value, '1')
+        self.mar.add_10(1)
         txt.insert(
             INSERT, 'MAR = ' + str(int(self.mar.value)) + '\n')
 
@@ -102,21 +116,16 @@ class System:
         """Pre-load the file
         It's called in GUI.fun_ipl
         """
-        file_dir = './program1.txt'
-        #file_dir = './ipl.txt'
-        pc_default = bin(int('100',16))[2:]
-        #pc_default = '1010'
         try:
-            with open(file_dir, 'r') as f:
+            with open(self.file_dir, 'r') as f:
                 lines = f.readlines()
             f.close()
         except FileNotFoundError:
-            txt_ipl_info.insert(INSERT, file_dir + 'does not exist')
+            txt_ipl_info.insert(INSERT, self.file_dir + 'does not exist')
             return
 
         for i in lines:
             i = i.replace('\n','')
-            print(i)
             if i == '':
                 continue
             # ipl_info update
@@ -132,7 +141,7 @@ class System:
                 INSERT, 'MEM[' + str(add) + '] = ' + value + '\n')
 
         # set pc by default
-        self.pc.value = pc_default
+        self.pc.value = bin(self.pc_default)[2:]
         txt_step_info.insert(INSERT, 'PC has been set to ' + self.pc.value)
 
     def __fetch(self, txt):
@@ -166,7 +175,7 @@ class System:
         ixr_id = int(word.ixr_index,2)
         if ixr_id != 0:
             ixr = self.xs[ixr_id-1]
-            iar.value = self.alu.arithmetic_cal('+', iar.value, ixr.value)
+            iar.value = bin(int(iar.value,2) + int(ixr.value,2))[2:]
             txt.insert(INSERT, 'IAR += ' + ixr.label + ' :\t\t\tIAR = ' + iar.value + '\n')
         # IAR <- MEM[IAR] if I = 1
         if int(word.indirect,2) == 1:
@@ -177,7 +186,7 @@ class System:
         self.mar.value = iar.value
         txt.insert(INSERT, 'MAR <- IAR :\t\t\tMAR = ' + self.mar.value + '\n\n')
 
-    def __execute_deposit(self, txt, word):
+    def __execute_deposit(self, txt, word, input, output):
         """The execution and depostion"""
         txt.insert(INSERT, 'Excute and Deposit Result \n')
         irr = Register(16,'IRR')
@@ -279,10 +288,12 @@ class System:
             txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
             if int(gpr.value,2) == 0:
                 txt.insert(INSERT, gpr.label + ' == 0\n')
+                # PC <- EA
                 self.pc.value = ea
                 txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 txt.insert(INSERT, gpr.label + ' != 0\n')
+                # PC ++
                 self.pc.next()
                 txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JNE: PC=EA if c(R)!=0 else PC++
@@ -290,20 +301,25 @@ class System:
             txt.insert(INSERT, gpr.label +  ' = ' + str(int(gpr.value)) + '\t\t\t')
             if int(gpr.value,2) != 0:
                 txt.insert(INSERT, gpr.label + ' != 0\n')
+                # PC <- EA
                 self.pc.value = ea
                 txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
             else:
                 txt.insert(INSERT, gpr.label + ' == 0\n')
+                # PC ++
                 self.pc.next()
                 txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JCC: PC=EA if CC[r]=1 else PC++
         elif op == 10:
             index = int(word.gpr_index,2)
             txt.insert(INSERT, 'CC[' + str(index) +'] = ' + self.cc.value[index] + '\n')
-            if int(self.cc.value[index]) == '1':
+            print(self.cc.value)
+            if self.cc.value[index] == '1':
+                # PC <- EA
                 self.pc.value = ea
                 txt.insert(INSERT, 'PC <- EA :\t\t\tPC = ' + self.pc.value + '\n\n')
             else:
+                # PC ++
                 self.pc.next()
                 txt.insert(INSERT, 'PC ++ :\t\t\tPC = ' + self.pc.value + '\n\n')
         # JMA:  PC=EA
@@ -351,7 +367,7 @@ class System:
                 txt.insert(INSERT, gpr.label + ' < 0\n')
                 self.pc.next()
                 txt.insert(INSERT, 'PC ++ : \t\t\tPC = ' + self.pc.value + '\n\n')
-        # MLT: Rx, Rx+1=c(Rx)*(Ry)
+        # MLT: Rx, Rx+1=c(Rx)*(Ry) 修改
         elif op == 16:
             if int(word.rx,2) not in [0,2] or int(word.ry,2) not in [0,2]:
                 txt.insert(INSERT, "Rx, Ry must be 0 or 2\n")
@@ -461,14 +477,27 @@ class System:
             # MEM[MAR] <- MBR
             self.mbr.store_to_mem(self.mar, self.mem)
             txt.insert(INSERT, 'MEM['+ self.mar.value.get_value() + '] <- MBR :\t\t\tMEM['+self.mar.value.get_value() + '] = ' + self.mem.memory[int(self.mar.value,2)] + '\n')
-        # IN
+        # IN: R[GPR] <- In
         elif op == 49:
-            pass
-        # OUT
+            txt.insert(INSERT, 'Please Input A Number\n\n')
+            if self.keyboard.write(input):
+                gpr.reset()
+                gpr.add_10(self.keyboard.read())
+                txt.insert(INSERT, gpr.label + ' <- Input :\t\t\t' + gpr.label + ' = ' + gpr.get_value() + '\n')
+            else:
+                txt.insert(INSERT, 'Invalid Input\n')
+                gpr.reset()
+        # OUT: Out <- R[GPR]
         elif op == 50:
-            pass
+            self.printer.write_line(gpr.get_value())
+            output.configure(state='normal')
+            output.delete(1.0, END)
+            output.insert(INSERT, self.printer.read_content())
+            output.yview_moveto('1.0')
+            output.configure(state='disabled')
+            txt.insert(INSERT, 'Output <- '+ gpr.label + ' :\t\t\tOutput ' + self.printer.read_line() +  '\n')
 
-    def single_step(self, txt):
+    def single_step(self, txt, input, output):
         """This function implements the single step
         It's called in GUI.func_ss
         """
@@ -482,16 +511,16 @@ class System:
             txt.insert(INSERT, 'Program is done\n\n')
             return 'DONE'
         # EA Compute: for some operation x, i are ignored, which means no EA needed
-        if op not in [6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26]:
+        if op not in [6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26, 49, 50]:
             self.__locate(txt, word)
         # Excute and Deposit
-        self.__execute_deposit(txt, word)
+        self.__execute_deposit(txt, word, input, output)
         # PC++: for some operation, pc++ is not needed
         if op not in [8,9,10,11,12,14,15]:
             self.pc.next()
             txt.insert(INSERT, '\nPC++ :\t\t\tPC = ' + self.pc.value + '\n\n')
 
-    def test_ins(self, ins, txt):
+    def test_ins(self, ins, txt, input, output):
         """This function implements testing of input instrucitons
         It's called in GUI.func_test
         """
@@ -500,6 +529,6 @@ class System:
         txt.insert(INSERT, msg)
         if msg == 'Decoding Complete\n\n':
             # for some operation x, i are ignored, which means no EA needed
-            if int(i.opcode,2) not in [6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26]:
+            if int(i.opcode,2) not in [6, 7, 13, 16, 17, 18, 19, 20, 21, 25, 26, 49, 50]:
                 self.__locate(txt, i)
-            self.__execute_deposit(txt, i)
+            self.__execute_deposit(txt, i, input, output)
