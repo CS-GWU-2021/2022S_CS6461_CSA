@@ -69,7 +69,7 @@ class MainWindow:
         win_title = 'CSCI6461'
         win_size = '1600x900'
         win_min_width = 1200
-        win_min_height = 750
+        win_min_height = 1200
         win_color = 'LightGray'
         win_margin = 10
         frame_sytle = RIDGE
@@ -187,23 +187,57 @@ class MainWindow:
 
         # Frame3
         self.frame3 = Frame(self.master,padx=win_margin,pady=win_margin)
-        self.frame3.grid(row=2,column=0,sticky=E,padx=win_margin)
+        self.frame3.grid(row=2,column=0,sticky=W+E,padx=win_margin)
+        self.frame3.grid_columnconfigure(0, weight=1)
+        self.frame3.grid_columnconfigure(1, weight=1)
 
-        # button of interaction
-        btn_store = Button(self.frame3, text='Store',width=interact_btn_width, command = self.func_store).grid(row=0,column=0,padx=10,pady=5,sticky=W+E)
-        btn_st_plus = Button(self.frame3, text='St+',width=interact_btn_width, command = self.func_st_plus).grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
-        btn_load = Button(self.frame3, text='Load',width=interact_btn_width, command = self.func_load).grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
-        btn_reset = Button(self.frame3, text='Reset',width=interact_btn_width, command = self.reset).grid(row=0,column=3,columnspan=2, padx=10,pady=5,sticky=W+E)
-        btn_ss = Button(self.frame3, text='SS',width=interact_btn_width, command = lambda: self.func_ss(True)).grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
-        btn_run = Button(self.frame3, text='Run',width=interact_btn_width, command = self.func_run).grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
-        btn_ipl = Button(self.frame3, text='IPL',width=interact_btn_width, command = self.func_ipl).grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
-        entry_test = Entry(self.frame3, textvariable=self.test_ins_input).grid(row=2,column=1,columnspan=2,sticky=W+E)
-        btn_test = Button(self.frame3, text='Test',width=interact_btn_width, command = self.func_test).grid(row=2,column=3,padx=10,pady=5,sticky=W+E)
+        self.frame3_1 = Frame(self.frame3,padx=win_margin,pady=win_margin)
+        self.frame3_1.grid(row=0,column=0,sticky=W+E,padx=win_margin)
+        self.frame3_1.grid_rowconfigure(0, weight=0)
+        self.frame3_1.grid_rowconfigure(1, weight=0, minsize = 20)
+
+        # Input and Output
+        self.input_content = StringVar()
+        self.input_trigger = IntVar()
+        self.input_entry = Entry(self.frame3_1, textvariable=self.input_content, state='disabled')
+        self.input_entry.grid(row=0,column=0,columnspan=2,sticky=W+E)
+        self.input_btn = Button(self.frame3_1, text='Enter', width=interact_btn_width, command=lambda: self.input_trigger.set(1))
+        self.input_btn.grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
+        self.input = [self.input_entry, self.input_content, self.input_btn, self.input_trigger]
+
+        self.out = ScrolledText(self.frame3_1, relief=text_box_style, width=50, height=10, state='disabled')
+        self.out.grid(row=1,column=0,sticky=W+E)
+
         # state indicator
-        #label_halt = Label(self.frame3, text='Halt/Run').grid(row=1,column=3,padx=10,pady=5,sticky=E)
-        #self.canvas = Canvas(self.frame3,width=40,height=40)
-        #self.canvas.grid(row=1,column=4,sticky=W)
-        #self.canvas.create_oval(5,15,20,30,fill="red")
+        label_halt = Label(self.frame3_1, text='Halt/Run').grid(row=1,column=3,padx=10,pady=5,sticky=E)
+        self.canvas = Canvas(self.frame3_1,width=40,height=40)
+        self.canvas.grid(row=1,column=4,sticky=W)
+        self.canvas.create_rectangle(5,15,20,30,fill="red")
+
+
+        self.frame3_2 = Frame(self.frame3,padx=win_margin,pady=win_margin)
+        self.frame3_2.grid(row=0,column=1,sticky=E,padx=win_margin)
+        # button of interaction
+        btn_store = Button(self.frame3_2, text='Store',width=interact_btn_width, command = self.func_store)
+        btn_store.grid(row=0,column=0,padx=10,pady=5,sticky=W+E)
+        btn_st_plus = Button(self.frame3_2, text='St+',width=interact_btn_width, command = self.func_st_plus)
+        btn_st_plus.grid(row=0,column=1,padx=10,pady=5,sticky=W+E)
+        btn_load = Button(self.frame3_2, text='Load',width=interact_btn_width, command = self.func_load)
+        btn_load.grid(row=0,column=2,padx=10,pady=5,sticky=W+E)
+        btn_reset = Button(self.frame3_2, text='Reset',width=interact_btn_width, command = self.reset)
+        btn_reset.grid(row=0,column=3,columnspan=2, padx=10,pady=5,sticky=W+E)
+        btn_ss = Button(self.frame3_2, text='SS',width=interact_btn_width, command = lambda: self.func_ss(True))
+        btn_ss.grid(row=1,column=0,padx=10,pady=5,sticky=W+E)
+        btn_run = Button(self.frame3_2, text='Run',width=interact_btn_width, command = self.func_run)
+        btn_run.grid(row=1,column=1,padx=10,pady=5,sticky=W+E)
+        btn_ipl = Button(self.frame3_2, text='IPL',width=interact_btn_width, command = self.func_ipl)
+        btn_ipl.grid(row=1,column=2,padx=10,pady=5,sticky=W+E)
+        entry_test = Entry(self.frame3_2, textvariable=self.test_ins_input).grid(row=2,column=1,columnspan=2,sticky=W+E)
+        btn_test = Button(self.frame3_2, text='Test',width=interact_btn_width, command = self.func_test)
+        btn_test.grid(row=2,column=3,padx=10,pady=5,sticky=W+E)
+
+        self.btns = [btn_store,btn_st_plus,btn_load,btn_ss,btn_run,btn_ipl,btn_test]
+
 
         # Frame4
         self.frame4 = Frame(self.master, bd=2, relief=frame_sytle, padx=win_margin,pady=win_margin)
@@ -256,7 +290,7 @@ class MainWindow:
 
     def reset(self):
         """This function resets all of the system"""
-        self.sys.reset()
+        self.sys.reset(self.out)
         self.refresh_reg_info()
         self.refresh_instruction_info()
 
@@ -275,6 +309,16 @@ class MainWindow:
         self.txt_ipl_info.configure(state='disabled')
         self.txt_mem_info.configure(state='disabled')
         self.txt_step_info.configure(state='disabled')
+
+        self.canvas.create_rectangle(5,15,20,30,fill="red")
+
+    def change_btn_state(self, state):
+        for i in self.btns:
+            if state:
+                i.configure(state='normal')
+            else:
+                i.configure(state='disabled')
+
 
     def refresh_instruction_info(self):
         """This function refreshes the text of instruction"""
@@ -370,20 +414,23 @@ class MainWindow:
     def func_ss(self, if_ss : bool):
         """This function implements single step"""
         self.txt_step_info.configure(state='normal')
-        #self.canvas.create_oval(5,15,20,30,fill="green")
         if if_ss:
             print('button ss is pressed')
+            self.change_btn_state(False)
+            self.canvas.create_rectangle(5,15,20,30,fill="green")
             self.txt_step_info.delete(1.0, END)
         self.txt_step_info.insert(INSERT, '-------------------------------------------------\n')
         self.txt_step_info.insert(INSERT, 'Step: PC = ' + self.pc.value + ' = ' + self.pc.get_value() + '\n\n')
-        state = self.sys.single_step(self.txt_step_info)
+        state = self.sys.single_step(self.txt_step_info, self.input, self.out)
         if if_ss:
             self.txt_step_info.insert(INSERT, 'System Halted\n\n')
+            self.canvas.create_rectangle(5,15,20,30,fill="red")
+            self.change_btn_state(True)
+        self.txt_step_info.yview_moveto('1.0')
         self.txt_step_info.configure(state='disabled')
-        #self.canvas.create_oval(5,15,20,30,fill="red")
         self.refresh_reg_info()
         self.refresh_mem_info()
-        # Halt indicator for func_run
+        # Program done indicator for func_run
         if state == 'DONE':
             return True
         return False
@@ -391,6 +438,8 @@ class MainWindow:
     def func_run(self):
         """This function implements RUN"""
         print('button run is pressed')
+        self.canvas.create_rectangle(5,15,20,30,fill="green")
+        self.change_btn_state(False)
         if_done = False
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.delete(1.0, END)
@@ -398,7 +447,9 @@ class MainWindow:
             if_done = self.func_ss(False)
         self.txt_step_info.configure(state='normal')
         self.txt_step_info.insert(INSERT, 'System Halted!\n\n')
+        self.canvas.create_rectangle(5,15,20,30,fill="red")
         self.txt_step_info.configure(state='disabled')
+        self.change_btn_state(True)
 
     def func_test(self):
         """This function implements instruciton testing"""
@@ -415,7 +466,7 @@ class MainWindow:
                 ins.append(i)
         ins = ' '.join(ins)
         self.txt_step_info.insert(INSERT, 'Input: ' + ins + '\n\n')
-        self.sys.test_ins(ins, self.txt_step_info)
+        self.sys.test_ins(ins, self.txt_step_info, self.input, self.out)
         self.refresh_reg_info()
         self.refresh_mem_info()
         self.txt_step_info.configure(state='disabled')
