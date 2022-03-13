@@ -10,8 +10,7 @@ class MainWindow:
     def __init__(self, master, sys):
         self.master = master
         self.sys = sys
-
-        self.mem = sys.mem
+        self.cache = sys.cache
         self.ins_object = sys.ins
         self.pc = sys.pc
         self.mar = sys.mar
@@ -253,7 +252,7 @@ class MainWindow:
         # label of info
         label_step_info = Label(self.frame4, text='Step_Info')
         label_step_info.grid(row=0,column=0,sticky=W+S+N)
-        label_mem_info = Label(self.frame4, text='Mem_Info')
+        label_mem_info = Label(self.frame4, text='Sys_Info')
         label_mem_info.grid(row=0,column=1,sticky=W+S+N)
         label_ipl_info = Label(self.frame4, text='IPL_Info')
         label_ipl_info.grid(row=0,column=2,sticky=W+S+N)
@@ -264,10 +263,10 @@ class MainWindow:
         self.txt_step_info.insert(INSERT, 'System Is Ready')
         self.txt_step_info.configure(state='disabled')
 
-        self.txt_mem_info = ScrolledText(self.frame4, relief=text_box_style)
-        self.txt_mem_info.grid(row=1,column=1, sticky=W+E+S+N)
-        self.refresh_mem_info()
-        self.txt_mem_info.configure(state='disabled')
+        self.txt_sys_info = ScrolledText(self.frame4, relief=text_box_style)
+        self.txt_sys_info.grid(row=1,column=1, sticky=W+E+S+N)
+        self.refresh_sys_info()
+        self.txt_sys_info.configure(state='disabled')
 
         self.txt_ipl_info = ScrolledText(self.frame4, relief=text_box_style)
         self.txt_ipl_info.grid(row=1,column=2,sticky=W+E+S+N)
@@ -295,19 +294,19 @@ class MainWindow:
         self.refresh_instruction_info()
 
         self.txt_ipl_info.configure(state='normal')
-        self.txt_mem_info.configure(state='normal')
+        self.txt_sys_info.configure(state='normal')
         self.txt_step_info.configure(state='normal')
 
         self.txt_ipl_info.delete(1.0, END)
-        self.txt_mem_info.delete(1.0, END)
+        self.txt_sys_info.delete(1.0, END)
         self.txt_step_info.delete(1.0, END)
 
         self.txt_ipl_info.insert(INSERT, 'Please press IPL to pre-load the program')
-        self.refresh_mem_info()
+        self.refresh_sys_info()
         self.txt_step_info.insert(INSERT, 'System Is Ready')
 
         self.txt_ipl_info.configure(state='disabled')
-        self.txt_mem_info.configure(state='disabled')
+        self.txt_sys_info.configure(state='disabled')
         self.txt_step_info.configure(state='disabled')
 
         self.canvas.create_rectangle(5,15,20,30,fill="red")
@@ -329,17 +328,17 @@ class MainWindow:
         self.txt_value_Indirect.set(space.join(list(self.ins_object.indirect)))
         self.txt_value_Address.set(space.join(list(self.ins_object.address)))
 
-    def refresh_mem_info(self):
+    def refresh_sys_info(self):
         """This function refreshes the mem_info"""
         content = ''
-        self.txt_mem_info.configure(state='normal')
-        self.txt_mem_info.delete(1.0, END)
+        self.txt_sys_info.configure(state='normal')
+        self.txt_sys_info.delete(1.0, END)
         for i in self.registers:
             content += i.label + ':\t' + self.txt_split(i.value.zfill(i.size)) +'\n'
-        for i in range(len(self.mem.memory)):
-            content += str(i) + ':\t' + str(int(self.mem.memory[i])) + '\n'
-        self.txt_mem_info.insert(INSERT, content)
-        self.txt_mem_info.configure(state='disabled')
+        content += self.cache.print_out()
+        content += self.cache.mem.print_out()
+        self.txt_sys_info.insert(INSERT, content)
+        self.txt_sys_info.configure(state='disabled')
 
     def refresh_reg_info(self):
         """This function refreshes the text of tegisters"""
@@ -362,7 +361,7 @@ class MainWindow:
         self.sys.reg_load_ins(index, self.txt_step_info)
         self.txt_step_info.configure(state='disabled')
         self.refresh_reg_info()
-        self.refresh_mem_info()
+        self.refresh_sys_info()
 
     def func_load(self):
         """This function loads the value of MEM[MAR] into MBR"""
@@ -373,7 +372,7 @@ class MainWindow:
         self.sys.load(self.txt_step_info)
         self.txt_step_info.configure(state='disabled')
         self.refresh_reg_info()
-        self.refresh_mem_info()
+        self.refresh_sys_info()
 
     def func_store(self):
         """This function stores the value of MBR into MEM[MAR]"""
@@ -383,7 +382,7 @@ class MainWindow:
         self.txt_step_info.insert(INSERT, 'Store into Memory:\n\n')
         self.sys.store(self.txt_step_info)
         self.txt_step_info.configure(state='disabled')
-        self.refresh_mem_info()
+        self.refresh_sys_info()
 
     def func_st_plus(self):
         """This function stores the value of MBR into MEM[MAR] and MAR++"""
@@ -394,7 +393,7 @@ class MainWindow:
         self.sys.st_plus(self.txt_step_info)
         self.txt_step_info.configure(state='disabled')
         self.refresh_reg_info()
-        self.refresh_mem_info()
+        self.refresh_sys_info()
 
     def func_ipl(self):
         """This function reset the system and pre-load the ipl.txt"""
@@ -408,7 +407,7 @@ class MainWindow:
         # mem_info refresh
         self.txt_ipl_info.configure(state='disabled')
         self.txt_step_info.configure(state='disabled')
-        self.refresh_mem_info()
+        self.refresh_sys_info()
         self.refresh_reg_info()
 
     def func_ss(self, if_ss : bool):
@@ -429,7 +428,7 @@ class MainWindow:
         self.txt_step_info.yview_moveto('1.0')
         self.txt_step_info.configure(state='disabled')
         self.refresh_reg_info()
-        self.refresh_mem_info()
+        self.refresh_sys_info()
         # Program done indicator for func_run
         if state == 'DONE':
             return True
@@ -468,6 +467,6 @@ class MainWindow:
         self.txt_step_info.insert(INSERT, 'Input: ' + ins + '\n\n')
         self.sys.test_ins(ins, self.txt_step_info, self.input, self.out)
         self.refresh_reg_info()
-        self.refresh_mem_info()
+        self.refresh_sys_info()
         self.txt_step_info.configure(state='disabled')
         self.test_ins_input.set('')
