@@ -371,7 +371,7 @@ class System:
                 # Rx = IRR
                 rx.value = irr.value
                 txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.value + '\n\n')
-                # IRR = Highter bits of Rx * Ry
+                # IRR = Lower bits of Rx * Ry
                 irr.value = res[16:]
                 txt.insert(INSERT, "IRR <- Low(Rx * Ry)\t\t\t" + irr.value + '\n')
                 # Rx+1 = IRR
@@ -392,19 +392,20 @@ class System:
                     # CC state
                     txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
                 else:
+                    # Rx+1 <- Rx % Ry
+                    irr.value = self.alu.arithmetic_cal('%', rx.value, ry.value)
+                    txt.insert(INSERT, "IRR <- Rx % Ry\t\t\t" + irr.value + '\n')
+                    # Rxx = IRR
+                    rxx = self.gprs[int(word.rx,2)+1]
+                    rxx.value = irr.value
+                    txt.insert(INSERT, rxx.label + ' <- IRR\t\t\t' + rxx.value + '\n\n')
                     # IRR = Rx / Ry
                     irr.value = self.alu.arithmetic_cal('/', rx.value, ry.value)
                     txt.insert(INSERT, "IRR <- Rx / Ry\t\t\t" + irr.value + '\n')
                     # Rx = IRR
                     rx.value = irr.value
                     txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.value + '\n\n')
-                    # Rx+1 <- Rx % Ry
-                    irr.value = self.alu.arithmetic_cal('%', rx.value, ry.value)
-                    txt.insert(INSERT, "IRR <- Rx % Ry\t\t\t " + irr.value + '\n')
-                    # Rxx = IRR
-                    rxx = self.gprs[int(word.rx,2)+1]
-                    rxx.value = irr.value
-                    txt.insert(INSERT, rxx.label + ' <- IRR\t\t\t' + rxx.value + '\n\n')
+
         # TRR: cc(4)=1 if c(Rx)=c(Ry) else cc(r)=0
         elif op == 18:
             if int(rx.value,2) == int(ry.value,2):
@@ -419,23 +420,29 @@ class System:
         elif op == 19:
             txt.insert(INSERT, rx.label + ' :\t\t\t' + rx.value + '\n')
             txt.insert(INSERT, ry.label + ' :\t\t\t' + ry.value + '\n')
+            # IRR = Rx & Ry
             irr.value = self.alu.logic_cal('&', rx.value, ry.value)
             txt.insert(INSERT,'IRR = Rx & Ry :\t\t\t' + irr.value.zfill(irr.size) + '\n')
+            # Rx = IRR
             rx.value = irr.value
             txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.value + '\n\n')
         # ORR: c(Rx)=c(Rx) OR c(Ry)
         elif op == 20:
             txt.insert(INSERT, rx.label + ' :\t\t\t' + rx.value + '\n')
             txt.insert(INSERT, ry.label + ' :\t\t\t' + ry.value + '\n')
+            # IRR = Rx | Ry
             irr.value = self.alu.logic_cal('|', rx.value, ry.value)
             txt.insert(INSERT,'IRR = Rx | Ry :\t\t\t' + irr.value.zfill(irr.size) + '\n')
+            # Rx = IRR
             rx.value = irr.value
             txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.value + '\n\n')
         # NOT: c(Rx)=NOT c(Rx)
         elif op == 21:
             txt.insert(INSERT, rx.label + ' :\t\t\t' + rx.value + '\n')
+            # IRR = ~ Rx
             irr.value = self.alu.logic_cal('~', rx.value)
             txt.insert(INSERT,'IRR = NOT Rx  :\t\t\t' + irr.value.zfill(irr.size) + '\n')
+            # Rx = IRR
             rx.value = irr.value
             txt.insert(INSERT, rx.label + ' <- IRR\t\t\t' + rx.value + '\n\n')
         # SRC: c(R) is shifted left(L/R=1) or right(L/R=0) either logically(A/L=1) or arithmetically(A/L=0)

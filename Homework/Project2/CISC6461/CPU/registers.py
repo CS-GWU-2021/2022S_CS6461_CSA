@@ -18,14 +18,6 @@ class Register:
         self.value = '0' * self.size
         self.label = label
 
-    def check_overflow(self, input_value):
-        """This function returns True when register overflows
-        Parameters:
-        ------------
-        input_value: str type; input value
-        """
-        return True if len(input_value) > self.size else False
-
     def check_state(self, input_value):
         """This function checks if the value cause fault"""
         max = int('1'*self.size,2)

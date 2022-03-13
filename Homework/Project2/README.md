@@ -23,7 +23,7 @@ Cache sits between memory and the rest of the processor
 - demonstrate that cache works (e.g. tracing data)
 ### 2. Program 1
 A program that reads 20 numbers (integers) from the keyboard, prints the numbers to the console printer, requests
-a number from the user, and searches the 20 numbers read in for the number closest to the number entered by the 
+a number from the user, and searches the 20 numbers read in for the number closest to the number entered by the
 user. Print the number entered by the user and the number closest to that number.
 - Number range from (0, 65535)
 ### 3. Transfer Instructions
@@ -43,7 +43,7 @@ user. Print the number entered by the user and the number closest to that number
 |4|AMR|Add Memory to Register|AMR r x i add|R=c(R)+c(EA)|
 |5|SMR|Subtract Memory from Register|SMR r x i add|R=c(R)-c(EA)|
 |6|AIR|Add Immediate to Register|AIR r immed|R=c(R)+Immed|x, i are ignored; do nothing if Immed=0; load r1 with Immed if c(r)=0|
-|7|SIR|Subtract Immediate to Register|SIR r immed|R=c(R)-Immed|x, i are ignored; do nothing if Immed=0; load r1 with -Immed if c(r)=0|
+|7|SIR|Subtract Immediate from Register|SIR r immed|R=c(R)-Immed|x, i are ignored; do nothing if Immed=0; load r1 with -Immed if c(r)=0|
 ### 5. Arithmetic and Logical Instructions (Register to Register)
 OpCode format
 |OpCode|Rx|Ry|Ignored|
@@ -53,11 +53,11 @@ OpCode format
 |OpCode|Instruction|Name|Example|Description|Comment|
 |------|-----------|----|-------|-----------|-------|
 |16|MLT|Multiply Register by Register|MLT rx ry|Rx, Rx+1=c(Rx)\*(Ry)|Rx, Ry must be 0 or 2; Rx contains the high oder bits, Rx+1 contains the low order bits; Set OVERFLOW if overflow
-|17|DVD|Devide Register by Register|DVD rx ry|Rx, Rx+1=c(Rx)/(Ry)|Rx, Ry must be 0 or 2; Rx contains the quotient; Rx+1 contains the ramainder; Set DIVZERO if c(Ry)=0|
+|17|DVD|Divide Register by Register|DVD rx ry|Rx, Rx+1=c(Rx)/(Ry)|Rx, Ry must be 0 or 2; Rx contains the quotient; Rx+1 contains the ramainder; Set DIVZERO if c(Ry)=0|
 |18|TRR|Test the Equality Of Register and Register|TRR rx ry|cc(4)=1 if c(Rx)=c(Ry) else cc(r)=0|
 |19|AND|Logical And of Register and Register|AND rx ry|c(Rx)=c(Rx) AND c(Ry)|
 |20|ORR|Logical Or of Register and Register|ORR rx ry|c(Rx)=c(Rx) OR c(Ry)|
-|21|NOT|Logical Not of Register to Register|NOT rx|c(Rx)=NOT c(Rx)|
+|21|NOT|Logical Not of Register|NOT rx|c(Rx)=NOT c(Rx)|
 ### 6. Shift/Rotate Instructions
 OpCode format
 |OpCode|R|A/L|L/R|Ignored|Count|
@@ -74,7 +74,7 @@ OpCode format
 |------|-|-------|-----|
 |6 bits|2 bits|3 bits|5 bits|
 
-DevID 
+DevID
 |DevID|Device|
 |-----|------|
 |0|Console Keyboard|
