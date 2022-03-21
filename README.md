@@ -15,7 +15,7 @@ CS6461 Computer System Architecture Homework
 |Term Paper Topic|Determine topic|Tue, 01/18|
 |Programming Project Part I |Basic part of computer simulator as described in the project handout. |Sun, 02/06|
 |Programming Project Part II|Part II of computer simulator project as described in the project handout.  Extension of instructions that can be executed. |Sat, 03/13|
-|Term Paper|Topic should be computer architecture related and should go beyond the depth of the topic area as covered by the course. |Sat, 03/26|
+|Term Paper|Topic should be computer architecture related and should go beyond the depth of the topic area as covered by the course. |Sat, 03/27|
 |Programming Project Part III|Part III of the computer simulator project as described in the project handout.  Beginning of performance improvements |Sat, 04/02|
 |Final Exam|Closed Book – 2 hours|Thu, 04/19|
 |Programming Project Part IV|Part IV of the computer simulator project as described in the project handout. Performance improvements included. |Wed,04/25|
