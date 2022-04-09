@@ -20,6 +20,7 @@ A program that reads a set of a paragraph of 6 sentences from a file into memory
 |------|-------|---------|
 |0-5(6 bits)|6-11(6 bits)|12-15(4 bits)|
 #### b. Definition
+OpCode 24  
 TRAP trapCode  
 e.g. TRAP 5
 #### c. Description
@@ -33,6 +34,7 @@ e.g. PC<-MEM[0]+TrapCode, execute sub-routine, back to MEM[2]
 |------|-|-------|-----|
 |0-5(6 bits)|6-7(2 bits)|8-10(2 bits)|11-15(5 bits)|
 #### b. Definition
+OpCode 61  
 CHK r Devid  
 e.g. CHK 2 1
 #### c. Description

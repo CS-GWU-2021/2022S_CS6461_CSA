@@ -1,6 +1,3 @@
-from CPU.registers import *
-from CPU.ALU import *
-from Memory.cache import *
-
-c = '1'*32
-print(c[17:])
+a = 12
+b = '122'
+print(f'A test of {a} is {b}')

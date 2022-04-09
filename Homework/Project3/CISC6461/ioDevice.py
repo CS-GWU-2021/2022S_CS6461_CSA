@@ -1,7 +1,7 @@
-#-------------------------------------------------------
+# -------------------------------------------------------
 # @Author :     Tenphun0503
 # This file implements the io logic
-#------------------------------------------------------
+# ------------------------------------------------------
 class IO:
     def __init__(self, id):
         self.id = id
@@ -9,6 +9,7 @@ class IO:
 
     def reset(self):
         self.content = ''
+
 
 class Keyboard(IO):
     def __init__(self, id=0):
@@ -34,6 +35,7 @@ class Keyboard(IO):
 
     def read(self):
         return self.content
+
 
 class Printer(IO):
     def __init__(self, id=1):
