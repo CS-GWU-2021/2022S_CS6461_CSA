@@ -1,0 +1,48 @@
+# main routine
+0000 03E8 # address of sub-routine table
+0006 6000 # trap to sub-routine 0
+# table of sub-routine
+03E8 03F8 # address of sub-routine 0
+03E9 0410 # address of sub-routine 1
+# sub-routine 0
+03F8 8440 # 1016,1017 load address of sb0 into x1
+03F9 8440
+03FA 2C49 # jump to process
+03FB 0006 # number of sentences of the paragraph
+03FC 044C # start of the paragraph in the memory
+03FD 044C # end of the paragraph
+0401 CF02 # check if file is exist
+0402 274C # Halt if False and Jump if Ture
+0403 0000 # HALT
+0404 0443 # r0 <- number of sentences
+0405 0702 # 1029, 1030 record return address
+0406 0B48
+0407 84C0 # 1031, 1032 load start of paragraph in memory into x3
+0408 84D4
+0409 0745 # load end of paragraph in memory into r3
+040A 3855 # loop of reading sentences
+040B 0B45 # update end of paragraph in memory
+040C 2C68 # return to main routine
+040D 6001 # trap to sub-routine 1
+040E 2C52 # continue loop
+# sub-routine 1
+0410 8480 # 1040, 1041 load address of sb1 into x2
+0411 8481
+0412 2C8A # jump to process
+0413 002E # ASCII of '.'
+0414 0021 # ASCII of '!'
+0415 003F # ASCII of '?'
+0419 2C56 # return to trap 0
+041A C502 # read a character
+041B 09C0 # store the character into memory
+041C 1B01
+041D 1583 # 1053, 1054 return if character is '.'
+041E 2189
+041F 05C0 # 1055, 1056, 1057 return if '!'
+0420 1584
+0421 2189
+0422 1583 # 1058, 1059, 1060 return if '?'
+0423 1585
+0424 2189
+0425 84C1 # store location move on
+0426 2C8A # continue loop
