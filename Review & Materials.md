@@ -14,6 +14,7 @@ Some useful materials those I referenced while doing my review. (mostly in Chine
 [State Elements: Circuits That Remember](https://inst.eecs.berkeley.edu/~cs61c/resources/state.pdf)
 - Part 3: Flip-flops
 #### c. Control
+- [Review of MIPS instruction formats](https://courses.cs.washington.edu/courses/cse378/09au/lectures/cse378au09-04.pdf)
 - Samples of MIPS insturctions: [MIPS指令集（共31条）](https://blog.csdn.net/qq_41848006/article/details/82256626)
 - 
 
