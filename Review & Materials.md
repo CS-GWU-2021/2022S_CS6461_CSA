@@ -19,4 +19,4 @@ Some useful materials those I referenced while doing my review. (mostly in Chine
 ## II. Pipelines, IPL
 - [计算机组成与设计-硬件/软件接口 学习笔记（二）](https://jcf94.com/2018/02/06/2018-02-06-cod2/)
 ## III. Tomasulo Algorithm
--[Tomasulo Algorithm and Dynamic Branch Prediction](http://people.eecs.berkeley.edu/~pattrsn/252/Lecture04.pdf)
+- [Tomasulo Algorithm and Dynamic Branch Prediction](http://people.eecs.berkeley.edu/~pattrsn/252/Lecture04.pdf)
