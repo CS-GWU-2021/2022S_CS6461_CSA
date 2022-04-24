@@ -20,7 +20,8 @@ class Instruction:
                             10: 'JCC', 11: 'JMA', 12: 'JSR', 13: 'RFS', 14: 'SOB',
                             15: 'JGE', 16: 'MLT', 17: 'DVD', 18: 'TRR', 19: 'AND',
                             20: 'ORR', 21: 'NOT', 24: 'TRAP', 25: 'SRC', 26: 'RRC',
-                            33: 'LDX', 34: 'STX', 49: 'IN', 50: 'OUT', 51: 'CHK'}
+                            27: 'FADD', 28: 'FSUB', 29: 'VADD', 30: 'VSUB', 31: 'CNVRT',
+                            33: 'LDX', 34: 'STX', 40: 'LDFR', 41: 'STFR', 49: 'IN', 50: 'OUT', 51: 'CHK'}
         self.dict_opcode.setdefault(0, 'HLT')
         # general operations
         self.opcode = None
