@@ -54,4 +54,6 @@ Each has 16 bits in length and the format as below:
 | 31     | CNVRT       | Convert to Fixed/Floating Point    | CNVRT fr x i add   | convert c(EA) to a fixed point number and stor in fr if fr=0 else convert to a FP and store in fr0 |
 | 50     | LDFR        | Load Floating Register From Memory | LDFR fr x i add    | c(fr)=c(EA), c(EA+1)                                                                               |                                                                            |
 | 51     | STFR        | Store Floating Register to Memory  | Store fr x i add   | c(EA),c(EA+1) = c(fr)                                                                              |                                                                             |
-## 4.Notes
+## 4.References
+[The IEEE 754 Format](http://mathcenter.oxford.emory.edu/site/cs170/ieee754/)
+[浮点数的加减法运算](https://blog.csdn.net/ruidianbaihuo/article/details/88067889)

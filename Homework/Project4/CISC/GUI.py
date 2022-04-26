@@ -39,10 +39,12 @@ class MainWindow:
         self.x1 = sys.x1
         self.x2 = sys.x2
         self.x3 = sys.x3
+        self.fpr0 = sys.fpr0
+        self.fpr1 = sys.fpr1
 
         # for refreshing
         self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3,
-                          self.pc, self.mar, self.mbr, self.ir, self.mfr, self.cc]
+                          self.pc, self.mar, self.mbr, self.fpr0, self.fpr1, self.ir, self.mfr, self.cc]
         # parameters to update the label widget
         self.txt_value_GPR0 = StringVar()
         self.txt_value_GPR1 = StringVar()
@@ -51,6 +53,9 @@ class MainWindow:
         self.txt_value_IXR1 = StringVar()
         self.txt_value_IXR2 = StringVar()
         self.txt_value_IXR3 = StringVar()
+        self.txt_value_FPR0 = StringVar()
+        self.txt_value_FPR1 = StringVar()
+
         self.txt_value_PC = StringVar()
         self.txt_value_MAR = StringVar()
         self.txt_value_MBR = StringVar()
@@ -59,8 +64,8 @@ class MainWindow:
         self.txt_value_CC = StringVar()
         self.txt_value_registers = [self.txt_value_GPR0, self.txt_value_GPR1, self.txt_value_GPR2, self.txt_value_GPR3,
                                     self.txt_value_IXR1, self.txt_value_IXR2, self.txt_value_IXR3, self.txt_value_PC,
-                                    self.txt_value_MAR, self.txt_value_MBR, self.txt_value_IR, self.txt_value_MFR,
-                                    self.txt_value_CC]
+                                    self.txt_value_MAR, self.txt_value_MBR, self.txt_value_FPR0, self.txt_value_FPR1,
+                                    self.txt_value_IR, self.txt_value_MFR, self.txt_value_CC]
         self.refresh_reg_info()
 
         self.txt_value_Opcode = StringVar()
@@ -121,6 +126,8 @@ class MainWindow:
         Label(self.frame1, text=self.x1.label).grid(row=4, column=0)
         Label(self.frame1, text=self.x2.label).grid(row=5, column=0)
         Label(self.frame1, text=self.x3.label).grid(row=6, column=0)
+        Label(self.frame1, text=self.fpr0.label).grid(row=7, column=0)
+        Label(self.frame1, text=self.fpr1.label).grid(row=8, column=0)
         Label(self.frame1, text=self.pc.label).grid(row=0, column=3)
         Label(self.frame1, text=self.mar.label).grid(row=1, column=3)
         Label(self.frame1, text=self.mbr.label).grid(row=2, column=3)
@@ -136,6 +143,8 @@ class MainWindow:
         Label(self.frame1, textvariable=self.txt_value_IXR1, relief=text_box_style).grid(row=4, column=1, sticky=W + E)
         Label(self.frame1, textvariable=self.txt_value_IXR2, relief=text_box_style).grid(row=5, column=1, sticky=W + E)
         Label(self.frame1, textvariable=self.txt_value_IXR3, relief=text_box_style).grid(row=6, column=1, sticky=W + E)
+        Label(self.frame1, textvariable=self.txt_value_FPR0, relief=text_box_style).grid(row=7, column=1, sticky=W + E)
+        Label(self.frame1, textvariable=self.txt_value_FPR1, relief=text_box_style).grid(row=8, column=1, sticky=W + E)
         Label(self.frame1, textvariable=self.txt_value_PC, relief=text_box_style).grid(row=0, column=4, sticky=W + E)
         Label(self.frame1, textvariable=self.txt_value_MAR, relief=text_box_style).grid(row=1, column=4, sticky=W + E)
         Label(self.frame1, textvariable=self.txt_value_MBR, relief=text_box_style).grid(row=2, column=4, sticky=W + E)
@@ -150,6 +159,8 @@ class MainWindow:
         Button(self.frame1, text='LD', command=lambda: self.func_reg_load(3)).grid(row=3, column=2)
         Button(self.frame1, text='LD', command=lambda: self.func_reg_load(4)).grid(row=4, column=2)
         Button(self.frame1, text='LD', command=lambda: self.func_reg_load(5)).grid(row=5, column=2)
+        Button(self.frame1, text='LD', command=lambda: self.func_reg_load(10)).grid(row=7, column=2)
+        Button(self.frame1, text='LD', command=lambda: self.func_reg_load(11)).grid(row=8, column=2)
         Button(self.frame1, text='LD', command=lambda: self.func_reg_load(6)).grid(row=6, column=2)
         Button(self.frame1, text='LD', command=lambda: self.func_reg_load(7)).grid(row=0, column=5)
         Button(self.frame1, text='LD', command=lambda: self.func_reg_load(8)).grid(row=1, column=5)
@@ -269,8 +280,13 @@ class MainWindow:
         btn_ss.grid(row=1, column=0, padx=10, pady=5, sticky=W + E)
         btn_run = Button(self.frame3_2, text='Run', width=interact_btn_width, command=self.func_run)
         btn_run.grid(row=1, column=1, padx=10, pady=5, sticky=W + E)
+        btn_pg1 = Button(self.frame3_2, text='Program1', width=interact_btn_width, command=self.func_pg1)
+        btn_pg1.grid(row=1, column=2, padx=10, pady=5, sticky=W + E)
+        btn_pg2 = Button(self.frame3_2, text='Program2', width=interact_btn_width, command=self.func_pg2)
+        btn_pg2.grid(row=1, column=3, padx=10, pady=5, sticky=W + E)
+
         btn_ipl = Button(self.frame3_2, text='IPL', width=interact_btn_width, command=self.func_ipl)
-        btn_ipl.grid(row=1, column=2, padx=10, pady=5, sticky=W + E)
+        btn_ipl.grid(row=2, column=0, padx=10, pady=5, sticky=W + E)
         Entry(self.frame3_2, textvariable=self.test_ins_input).grid(row=2, column=1, columnspan=2, sticky=W + E)
         btn_test = Button(self.frame3_2, text='Test', width=interact_btn_width, command=self.func_test)
         btn_test.grid(row=2, column=3, padx=10, pady=5, sticky=W + E)
@@ -418,6 +434,36 @@ class MainWindow:
         self.txt_step_info.configure(state='disabled')
         self.refresh_reg_info()
         self.refresh_sys_info()
+
+    def func_pg1(self):
+        """This function reset the system and preload the program1"""
+        print('button pg1 is pressed')
+        self.reset()
+        self.txt_ipl_info.configure(state='normal')
+        self.txt_step_info.configure(state='normal')
+        self.txt_ipl_info.delete(1.0, END)
+        self.txt_step_info.delete(1.0, END)
+        self.sys.load_pg1(self.txt_ipl_info, self.txt_step_info)
+        # mem_info refresh
+        self.txt_ipl_info.configure(state='disabled')
+        self.txt_step_info.configure(state='disabled')
+        self.refresh_sys_info()
+        self.refresh_reg_info()
+
+    def func_pg2(self):
+        """This function reset the system and preload the program1"""
+        print('button pg1 is pressed')
+        self.reset()
+        self.txt_ipl_info.configure(state='normal')
+        self.txt_step_info.configure(state='normal')
+        self.txt_ipl_info.delete(1.0, END)
+        self.txt_step_info.delete(1.0, END)
+        self.sys.load_pg2(self.txt_ipl_info, self.txt_step_info)
+        # mem_info refresh
+        self.txt_ipl_info.configure(state='disabled')
+        self.txt_step_info.configure(state='disabled')
+        self.refresh_sys_info()
+        self.refresh_reg_info()
 
     def func_ipl(self):
         """This function reset the system and preload the ipl.txt"""

@@ -1,19 +1,3 @@
-import ioDevice as io
-reader = io.Reader()
-reader.read_file('test.txt')
-content = list(reader.content[0])
-cache = [None]*200
-for i, character in enumerate(content):
-    cache[i] = bin(ord(character))[2:]
-print(cache)
-
-dict_opcode = {0: 'HLT', 1: 'LDR', 2: 'STR', 3: 'LDA', 4: 'AMR',
-                    5: 'SMR', 6: 'AIR', 7: 'SIR', 8: 'JZ', 9: 'JNE',
-                    10: 'JCC', 11: 'JMA', 12: 'JSR', 13: 'RFS', 14: 'SOB',
-                    15: 'JGE', 16: 'MLT', 17: 'DVD', 18: 'TRR', 19: 'AND',
-                    20: 'ORR', 21: 'NOT', 24: 'TRAP', 25: 'SRC', 26: 'RRC',
-                    33: 'LDX', 34: 'STX', 49: 'IN', 50: 'OUT', 51: 'CHK'}
-
 '''
 0: 1000                 # address of sub-routine table
 6: trap 0               # trap to sub-routine 0
@@ -62,3 +46,37 @@ dict_opcode = {0: 'HLT', 1: 'LDR', 2: 'STR', 3: 'LDA', 4: 'AMR',
 1062: JMA x2 0 10       # continue loop
 '''
 
+
+
+def encode(value):
+    if value >= 0:
+        s = 0
+    else:
+        s = 1
+    e = 0
+    m = abs(value)
+    while m >= 2:
+        m = m / 2
+        e += 1
+    while m < 1:
+        m = m * 2
+        e -= 1
+    print(s, e, m)
+    s = str(s)
+    e = bin(e + 63)[2:].zfill(7)
+    m = m - 1
+    temp = ''
+    for i in range(8):
+        m *= 2
+        if m >= 1:
+            temp += '1'
+            m -= 1
+        else:
+            temp += '0'
+    m = temp
+    print(s,e,m)
+    return s + e + m
+
+print(encode(6.3))
+
+print(4.6-int(4.6))

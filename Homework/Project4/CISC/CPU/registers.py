@@ -159,3 +159,92 @@ class IXR(Register):
 
     def __init__(self, size=16, label='IXR'):
         super().__init__(size=size, label=label)
+
+
+class FPR(Register):
+    """This is the class of Floating Point Register
+    FPR has 4 bits
+    """
+
+    def __init__(self, size=16, label='FPR'):
+        super().__init__(size=size, label=label)
+        self.s = None
+        self.e = None
+        self.m = None
+
+    def reset(self):
+        self.value = '0' * self.size
+        self.s = None
+        self.e = None
+        self.m = None
+
+    def update(self):
+        print('update', self.value)
+        self.s = int(self.value[0], 2)
+        self.e = int(self.value[1:8], 2) - 63
+        self.m = 1
+        for id, i in enumerate(self.value[8:]):
+            self.m += int(i) * (1 / (2 ** (id + 1)))
+        value = ((-1) ** self.s) * self.m * (2 ** self.e)
+        print('update', self.s, self.e, self.m)
+        return value
+
+    def encode(self, value):
+        if value >= 0:
+            self.s = 0
+        else:
+            self.s = 1
+        self.e = 0
+        self.m = abs(value)
+        while self.m >= 2:
+            self.m = self.m / 2
+            self.e += 1
+        while self.m < 1:
+            self.m = self.m * 2
+            self.e -= 1
+        print('encode', self.s, self.e, self.m)
+        s = str(self.s)
+        e = bin(self.e + 63)[2:].zfill(7)
+        m = self.m - 1
+        temp = ''
+        for i in range(8):
+            m *= 2
+            if m >= 1:
+                temp += '1'
+                m -= 1
+            else:
+                temp += '0'
+        m = temp
+        return s + e + m
+
+    def convert(self, value):
+
+        if value >= 0:
+            self.s = '0'
+        else:
+            self.s = '1'
+        self.e = bin(int(value))[2:].zfill(7)
+        temp = ''
+        remain = value - int(value)
+        print('remain', remain)
+        for i in range(8):
+            remain *= 2
+            if remain >= 1:
+                temp += '1'
+                remain -= 1
+            else:
+                temp += '0'
+        self.m = temp
+        print(self.s, self.e, self.m)
+        return self.s + self.e + self.m
+
+    def reverse_convert(self, value):
+        self.s = int(value[0])
+        self.e = int(value[1:8], 2)
+        self.m = 0
+        for id, i in enumerate(value[8:]):
+            if i == '1':
+                self.m += int(i) * (1 / (2 ** (id + 1)))
+        value = ((-1) ** self.s) * (self.m + self.e)
+        return value
+

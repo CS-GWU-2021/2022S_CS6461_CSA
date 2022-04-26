@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="06c36b18-b52b-45ba-bd6a-85679d908dfc" name="变更" comment="">
+    <list default="true" id="06c36b18-b52b-45ba-bd6a-85679d908dfc" name="变更" comment="add instructions">
+      <change afterPath="$PROJECT_DIR$/program1.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/program3.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CPU/ALU.py" beforeDir="false" afterPath="$PROJECT_DIR$/CPU/ALU.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CPU/instruction.py" beforeDir="false" afterPath="$PROJECT_DIR$/CPU/instruction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CPU/registers.py" beforeDir="false" afterPath="$PROJECT_DIR$/CPU/registers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ioDevice.py" beforeDir="false" afterPath="$PROJECT_DIR$/ioDevice.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/system.py" beforeDir="false" afterPath="$PROJECT_DIR$/system.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/temp.py" beforeDir="false" afterPath="$PROJECT_DIR$/temp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -45,6 +54,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -115,7 +125,21 @@
       <option name="project" value="LOCAL" />
       <updated>1650661017600</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Updated Readmemd">
+      <created>1650825935073</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1650825935073</updated>
+    </task>
+    <task id="LOCAL-00003" summary="add instructions">
+      <created>1650825946174</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1650825946174</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -130,7 +154,10 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="project 4 starts" />
-    <option name="LAST_COMMIT_MESSAGE" value="project 4 starts" />
+    <MESSAGE value="Updated Readmemd" />
+    <MESSAGE value="add instructions" />
+    <option name="LAST_COMMIT_MESSAGE" value="add instructions" />
   </component>
 </project>

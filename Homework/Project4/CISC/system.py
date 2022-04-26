@@ -29,6 +29,8 @@ class System:
         self.x1 = IXR(label='IXR1')
         self.x2 = IXR(label='IXR2')
         self.x3 = IXR(label='IXR3')
+        self.fpr0 = FPR(label='FPR0')
+        self.fpr1 = FPR(label='FPR1')
         # initialize ALU
         self.alu = ALU(self.cc)
         # initialize io devices
@@ -38,13 +40,15 @@ class System:
 
         # for refreshing
         self.registers = [self.gpr0, self.gpr1, self.gpr2, self.gpr3, self.x1, self.x2, self.x3,
-                          self.pc, self.mar, self.mbr, self.ir, self.mfr, self.cc]
+                          self.pc, self.mar, self.mbr, self.fpr0, self.fpr1, self.ir, self.mfr, self.cc]
         self.gprs = [self.gpr0, self.gpr1, self.gpr2, self.gpr3]
         self.xs = [self.x1, self.x2, self.x3]
+        self.fprs = [self.fpr0, self.fpr1]
 
         self.file_dir = file_dir
         self.pc_default = pc_default
         self.text_dir = text_dir
+        self.pnum = 0
         self.content = None
 
         # TODO: add mfr, like cc, 4 digits code
@@ -114,6 +118,71 @@ class System:
         txt.insert(INSERT, 'MAR++:\n')
         self.mar.add_10(1)
         txt.insert(INSERT, 'MAR = ' + str(int(self.mar.value)) + '\n')
+
+    def load_pg1(self, txt_ipl_info, txt_step_info):
+        """Preload the program1
+        It's called in GUI.func_pg1
+        """
+        try:
+            with open('program1.txt', 'r') as f:
+                lines = f.readlines()
+            f.close()
+        except FileNotFoundError:
+            txt_ipl_info.insert(INSERT, 'Program1.txt does not exist')
+            return
+
+        for i in lines:
+            i = i.replace('\n', '')
+            if i == '':
+                continue
+            # ipl_info update
+            txt_ipl_info.insert(INSERT, i + '\n')
+            # mem[add] <- value
+            temp = i.split(' ')
+            if temp[0] == '#':
+                continue
+            add, value = int(temp[0], 16), bin(int(temp[1][0:4], 16))[2:]
+            self.cache.mem.set_to_memory(add, value)
+            # step_info update
+            txt_step_info.insert(INSERT, f'MEM[{str(add)}] = {value}\n')
+
+        # set pc by default
+        self.pc.value = bin(6)[2:]
+        txt_step_info.insert(INSERT, 'PC has been set to ' + self.pc.value)
+        self.pnum = 1
+
+    def load_pg2(self, txt_ipl_info, txt_step_info):
+        """Preload the program2
+        It's called in GUI.func_pg2
+        """
+        try:
+            with open('program2.txt', 'r') as f:
+                lines = f.readlines()
+            f.close()
+        except FileNotFoundError:
+            txt_ipl_info.insert(INSERT, 'Program2.txt does not exist')
+            return
+
+        for i in lines:
+            i = i.replace('\n', '')
+            if i == '':
+                continue
+            # ipl_info update
+            txt_ipl_info.insert(INSERT, i + '\n')
+            # mem[add] <- value
+            temp = i.split(' ')
+            if temp[0] == '#':
+                continue
+            add, value = int(temp[0], 16), bin(int(temp[1][0:4], 16))[2:]
+            self.cache.mem.set_to_memory(add, value)
+            # step_info update
+            txt_step_info.insert(INSERT, f'MEM[{str(add)}] = {value}\n')
+
+        # set pc by default
+        self.pc.value = bin(6)[2:]
+        txt_step_info.insert(INSERT, 'PC has been set to ' + self.pc.value)
+        self.text_dir = 'test.txt'
+        self.pnum = 2
 
     def load_file(self, txt_ipl_info, txt_step_info):
         """Preload the file
@@ -204,6 +273,10 @@ class System:
             l_r = int(word.l_r)
             count = int(word.count, 2)
             gpr = self.gprs[int(word.gpr_index, 2)]
+        # FP and Vector
+        elif op in [27, 28, 29, 30, 31, 40, 41]:
+            fpr = self.fprs[int(word.fpr_index, 2)]
+            ixr = self.xs[int(word.ixr_index, 2) - 1]
         else:
             gpr = self.gprs[int(word.gpr_index, 2)]
             ixr = self.xs[int(word.ixr_index, 2) - 1]
@@ -495,6 +568,88 @@ class System:
             gpr.value = self.alu.rotate(gpr.value.zfill(gpr.size), count, l_r, a_l)
             txt.insert(INSERT, gpr.label + ' :\t\t\t' + gpr.value + '\n')
             txt.insert(INSERT, 'CC State:\t\t\t' + self.cc.state + '\n')
+        # FADD
+        elif op == 27:
+            # MBR <- MEM[MAR]
+            self.mbr.value = self.cache.get(int(self.mar.value, 2)).zfill(16)
+            txt.insert(INSERT, f'MBR <- {self.cache.msg}')
+            # IRR <- FPR + MBR
+            irr.value = self.alu.fp_cal('+', fpr.value, self.mbr.value).zfill(16)
+            txt.insert(INSERT, f'IRR <- {fpr.label} + MBR:\t\t\t{irr.value}\n')
+            txt.insert(INSERT, f'{round(fpr.update(), 1)} + {round(self.translate(self.mbr.value), 1)}:'
+                               f'\t\t\t{round(self.alu.value, 1)}\n')
+            # FPR <- IRR
+            fpr.value = irr.value
+            txt.insert(INSERT, f'{fpr.label} <- IRR :\t\t\t{fpr.value}\n')
+            # set CC
+            if self.cc.value[0] == '1':
+                txt.insert(INSERT, 'OVERFLOWED')
+        # FSUB
+        elif op == 28:
+            # MBR <- MEM[MAR]
+            self.mbr.value = self.cache.get(int(self.mar.value, 2)).zfill(16)
+            txt.insert(INSERT, f'MBR <- {self.cache.msg}')
+            # IRR <- FPR - MBR
+            irr.value = self.alu.fp_cal('-', fpr.value, self.mbr.value).zfill(16)
+            txt.insert(INSERT, f'IRR <- {fpr.label} + MBR:\t\t\t{irr.value}\n')
+            txt.insert(INSERT, f'{round(fpr.update(), 1)} - {round(self.translate(self.mbr.value), 1)}:'
+                               f'\t\t\t{round(self.alu.value, 1)}\n')
+            # FPR <- IRR
+            fpr.value = irr.value
+            txt.insert(INSERT, f'{fpr.label} <- IRR :\t\t\t{fpr.value}\n')
+            # set CC
+            if self.cc.value[1] == '1':
+                txt.insert(INSERT, 'UNDERFLOWED')
+        # VADD
+        elif op == 29:
+            v1_start = int(self.cache.get(int(self.mar.value, 2)), 2)
+            txt.insert(INSERT, f'Vector 1 starts from {v1_start}\n')
+            v2_start = int(self.cache.get(int(self.mar.value, 2) + 1), 2)
+            txt.insert(INSERT, f'Vector 2 starts from {v2_start}\n')
+            step = int(fpr.value, 2)
+            txt.insert(INSERT, f'Length of the vector is {step}\n')
+            for i in range(step):
+                v1 = self.cache.get(v1_start + i).zfill(16)
+                v2 = self.cache.get(v2_start + i).zfill(16)
+                irr.value = self.alu.fp_cal('+', v1, v2)
+                txt.insert(INSERT, f'V1[{i+1}] <- V1[{i+1}] + V2[{i+1}]:\t\t\t')
+                txt.insert(INSERT, f'{round(self.translate(v1), 1)} + {round(self.translate(v2), 1)} = '
+                                   f'{round(self.alu.value, 1)}\n')
+                self.cache.set(v1_start + i, irr.value)
+        # VSUB
+        elif op == 30:
+            v1_start = int(self.cache.get(int(self.mar.value, 2)), 2)
+            txt.insert(INSERT, f'Vector 1 starts from {v1_start}\n')
+            v2_start = int(self.cache.get(int(self.mar.value, 2) + 1), 2)
+            txt.insert(INSERT, f'Vector 2 starts from {v2_start}\n')
+            step = int(fpr.value, 2)
+            txt.insert(INSERT, f'Length of the vector is {step}\n')
+            for i in range(step):
+                v1 = self.cache.get(v1_start + i).zfill(16)
+                v2 = self.cache.get(v2_start + i).zfill(16)
+                irr.value = self.alu.fp_cal('-', v1, v2)
+                txt.insert(INSERT, f'V1[{i+1}] <- V1[{i+1}] - V2[{i+1}]:\t\t\t')
+                txt.insert(INSERT, f'{round(self.translate(v1), 1)} - {round(self.translate(v2), 1)} = '
+                                   f'{round(self.alu.value, 1)}\n')
+                self.cache.set(v1_start + i, irr.value)
+        # CNVRT
+        elif op == 31:
+            flag = int(fpr.value, 2)
+            # MBR <- MEM[MAR]
+            self.mbr.value = self.cache.get(int(self.mar.value, 2)).zfill(16)
+            txt.insert(INSERT, f'MBR <- {self.cache.msg}')
+            fpr.value = self.mbr.value
+            # convert to a fixed number
+            if flag == 0:
+                v = fpr.update()
+                fpr.value = fpr.convert(v)
+                txt.insert(INSERT, f'{round(v, 2)} converted to {fpr.value}\n')
+            # convert to a floating point and store in fr0
+            else:
+                v = fpr.reverse_convert(fpr.value)
+                self.fpr0.value = fpr.encode(v)
+                fpr.value = '1'
+                txt.insert(INSERT, f'{round(v, 2)} converted to {self.fpr0.value}\n')
         # LDX
         elif op == 33:
             # MBR <- MEM[MAR]
@@ -517,6 +672,28 @@ class System:
             # MEM[MAR] <- MBR
             self.cache.set(int(self.mar.value, 2), self.mbr.value)
             txt.insert(INSERT, self.cache.msg)
+        # LDFR
+        elif op == 40:
+            # MBR <- MEM[MAR]
+            self.mbr.value = self.cache.get(int(self.mar.value, 2)).zfill(16)
+            txt.insert(INSERT, f'MBR <- {self.cache.msg}')
+            # IRR <- MBR
+            irr.value = self.mbr.value
+            txt.insert(INSERT, f'IRR <- MBR :\t\t\t{irr.value}\n')
+            # FPR <- IRR
+            fpr.value = irr.value
+            txt.insert(INSERT, f'{fpr.label} <- IRR :\t\t\t{fpr.value}\n')
+        # STFR
+        elif op == 41:
+            # IRR <- R[GPR]
+            irr.value = gpr.value
+            txt.insert(INSERT, f'IRR <- {gpr.label} :\t\t\t{irr.value}\n')
+            # MBR <- IRR
+            self.mbr.value = irr.value
+            txt.insert(INSERT, 'MBR <- IRR :\t\t\t{self.mbr.value}\n')
+            # MEM[MAR] <- MBR
+            self.cache.set(int(self.mar.value, 2), self.mbr.value)
+            txt.insert(INSERT, self.cache.msg)
         # IN: R[GPR] <- In
         elif op == 49:
             # keyboard
@@ -525,22 +702,23 @@ class System:
                 if self.keyboard.write(input):
                     gpr.reset()
                     character = self.keyboard.read()
-                    print(character)
-                    gpr.add_10(ord(character))
+                    if self.pnum == 1:
+                        gpr.add_10(int(character))
+                    else:
+                        gpr.add_10(ord(character))
                     txt.insert(INSERT, gpr.label + f' <- {character} :\t\t\t' + gpr.label + ' = ' + gpr.get_value() + '\n')
                 else:
                     txt.insert(INSERT, 'Invalid Input\n')
                     gpr.reset()
             elif devid == 2:
                 character = self.content.pop(0)
-                print(character)
                 txt.insert(INSERT, f"Read '{character}'\n")
                 gpr.value = bin(ord(character))[2:]
                 txt.insert(INSERT, f'{gpr.label} <- Read :\t\t\t{gpr.value}\n')
 
         # OUT: Out <- R[GPR]
         elif op == 50:
-            self.printer.write_line(gpr.get_value())
+            self.printer.write_line(self.pnum, gpr.get_value())
             output.configure(state='normal')
             output.delete(1.0, END)
             output.insert(INSERT, self.printer.read_content())
@@ -558,7 +736,15 @@ class System:
                 gpr.value = self.reader.flag
                 txt.insert(INSERT, f'{gpr.label} set by status :\t\t\t{gpr.value}')
 
-
+    def translate(self, fp):
+        fp = fp.zfill(16)
+        s = int(fp[0], 2)
+        e = int(fp[1:8], 2) - 63
+        m = 1
+        for id, i in enumerate(fp[8:]):
+            m += int(i) * (1 / (2 ** (id + 1)))
+        value = ((-1) ** s) * m * (2 ** e)
+        return value
 
     def single_step(self, txt, input, output):
         """This function implements the single step

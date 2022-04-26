@@ -48,9 +48,10 @@ class Printer(IO):
         self.content += 'line ' + str(self.line_id) + ':\t' + self.content_line + '\n'
         self.line_id += 1
 
-    def write_line(self, new_line):
-        if int(new_line) > 10:
-            new_line = chr(int(new_line))
+    def write_line(self, pnum, new_line):
+        if pnum == 2:
+            if int(new_line) > 10:
+                new_line = chr(int(new_line))
         self.content_line = new_line
         self.content += 'line ' + str(self.line_id) + ':\t' + self.content_line + '\n'
         self.line_id += 1
@@ -89,7 +90,3 @@ class Reader(IO):
         except FileNotFoundError:
             self.flag = '0'
             self.msg = f'DOES NOT EXISTED\t\t\t{file_dir}\n'
-
-
-
-

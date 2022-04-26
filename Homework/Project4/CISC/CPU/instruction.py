@@ -26,6 +26,7 @@ class Instruction:
         # general operations
         self.opcode = None
         self.gpr_index = None
+        self.fpr_index = None
         self.ixr_index = None
         self.indirect = None
         self.address = None
@@ -59,6 +60,9 @@ class Instruction:
         # Trap Code
         elif opcode_value == 24:
             self.trap_code = self.value[12:]
+        # FP and Vector
+        elif opcode_value in [27, 28, 29, 30, 31, 40, 41]:
+            self.fpr_index = self.value[6:8]
         self.gpr_index = self.value[6:8]
         self.ixr_index = self.value[8:10]
         self.indirect = self.value[10]
@@ -190,6 +194,9 @@ class Instruction:
                 return msg
             else:
                 r, x, i, add = ins_test[1:]
+                if self.opcode in [27, 28, 29, 30, 31, 40, 41]:
+                    if int(r) not in [0, 1]:
+                        return 'R should be 0 or 1\n'
                 if int(r) not in [0, 1, 2, 3]:
                     return 'R should be 0, 1, 2 or 3\n'
                 elif int(x) not in [0, 1, 2, 3]:
@@ -199,11 +206,12 @@ class Instruction:
                 else:
                     self.opcode = bin(self.opcode)[2:].zfill(6)
                     self.gpr_index = bin(int(r))[2:].zfill(2)
+                    self.fpr_index = bin(int(r))[2:].zfill(2)
                     self.ixr_index = bin(int(x))[2:].zfill(2)
                     self.indirect = bin(int(i))[2:].zfill(1)
                     self.address = bin(int(add))[2:].zfill(5)
                     self.value = self.opcode + self.gpr_index + self.ixr_index + self.indirect + self.address
         hex_value = hex(int(self.value, 2))[2:]
-        print(self.value)
-        print(' ' + hex_value.upper().zfill(4) + ' ')
+        print(f'Encoded Instruction: ' + self.value)
+        print('' + hex_value.upper().zfill(4) + '')
         return f'Decoding Complete\n\n'
